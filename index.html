@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>Achievement Tracker</title>
+<style>
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --card2:#f8fafc;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --accent:#0f172a;
+  --accentText:#ffffff;
+  --work:#2563eb;
+  --workSoft:#dbeafe;
+  --break:#d97706;
+  --breakSoft:#fef3c7;
+  --good:#16a34a;
+  --goodSoft:#dcfce7;
+  --pro:#7c3aed;
+  --proSoft:#ede9fe;
+  --legend:#d99a00;
+  --legendSoft:#fff3c4;
+  --pending:#64748b;
+  --pendingSoft:#e2e8f0;
+  --danger:#dc2626;
+}
+body.dark{
+  --bg:#070b11;
+  --card:#101720;
+  --card2:#151e29;
+  --text:#f8fafc;
+  --muted:#a6b0bf;
+  --line:#293545;
+  --accent:#f8fafc;
+  --accentText:#0f172a;
+  --work:#60a5fa;
+  --workSoft:#152a47;
+  --break:#fbbf24;
+  --breakSoft:#3b2d10;
+  --good:#4ade80;
+  --goodSoft:#123523;
+  --pro:#c084fc;
+  --proSoft:#32204b;
+  --legend:#facc15;
+  --legendSoft:#3a3110;
+  --pending:#94a3b8;
+  --pendingSoft:#202b39;
+  --danger:#f87171;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+  transition:background .2s,color .2s;
+}
+.container{max-width:1080px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+h1{font-size:24px;margin:0}
+.subtitle,.small,.note{color:var(--muted);font-size:13px}
+.subtitle{margin-top:4px}
+.header-actions{display:flex;gap:8px}
+button{
+  font:inherit;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+  border-radius:11px;
+  padding:10px 14px;
+  cursor:pointer;
+}
+button:hover:not(:disabled){filter:brightness(.97)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:8px;margin-bottom:16px;overflow:auto;padding-bottom:2px}
+.tab.active{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.035);
+}
+.card h2{font-size:18px;margin:0 0 5px}
+.section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rank-dashboard{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+.rank-card{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px 12px;
+  text-align:center;
+  background:var(--card2);
+  min-height:150px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.rank-period{font-size:12px;color:var(--muted);margin-bottom:6px}
+.rank-icon{font-size:28px;line-height:1;margin-bottom:7px}
+.rank-name{font-size:20px;font-weight:850}
+.rank-value{font-size:13px;color:var(--muted);margin-top:5px}
+.rank-extra{font-size:11px;color:var(--muted);margin-top:6px;min-height:16px}
+.rank-card.rank-good{border-color:color-mix(in srgb,var(--good) 45%,var(--line));background:var(--goodSoft)}
+.rank-card.rank-pro{border-color:color-mix(in srgb,var(--pro) 45%,var(--line));background:var(--proSoft)}
+.rank-card.rank-legend{border-color:color-mix(in srgb,var(--legend) 55%,var(--line));background:var(--legendSoft)}
+.rank-card.rank-pending{background:var(--pendingSoft)}
+.rank-good .rank-name{color:var(--good)}
+.rank-pro .rank-name{color:var(--pro)}
+.rank-legend .rank-name{color:var(--legend)}
+.rank-pending .rank-name{color:var(--pending)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:12px;padding:13px;text-align:center;background:var(--card2)}
+.stat strong{display:block;font-size:25px}
+.stat span{font-size:12px;color:var(--muted)}
+
+.timer-panel{
+  margin-top:14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:18px;
+  text-align:center;
+  background:var(--card2);
+}
+.timer-label{font-size:13px;color:var(--muted)}
+.timer{
+  font-variant-numeric:tabular-nums;
+  font-size:54px;
+  font-weight:850;
+  letter-spacing:2px;
+  margin:6px 0;
+}
+.timer.work-mode{color:var(--work)}
+.timer.break-mode{color:var(--break)}
+.timer-heartbeat{margin-top:8px;font-size:11px;color:var(--muted)}
+.timer-heartbeat.running{color:var(--good)}
+.timer-heartbeat.paused{color:var(--break)}
+.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.primary{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.breakbtn{border-color:var(--break);color:var(--break)}
+.returnbtn{border-color:var(--work);color:var(--work)}
+.soundbtn.sound-off{opacity:.6}
+
+.mini-support-note{font-size:11px;color:var(--muted)}
+
+
+.hours{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:16px}
+.hour{
+  height:74px;
+  border:2px solid var(--line);
+  border-radius:13px;
+  padding:0;
+  background:var(--card2);
+  position:relative;
+  overflow:hidden;
+  cursor:default;
+  isolation:isolate;
+}
+.hour .fill{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0%;
+  background:var(--work);
+  opacity:.28;
+  z-index:-1;
+  transition:width 1s linear;
+}
+.hour .num{font-weight:850;font-size:18px;color:var(--text)}
+.hour .state{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.hour.done{background:var(--accent);border-color:var(--accent)}
+.hour.done .num,.hour.done .state{color:var(--accentText)}
+.hour.done .fill{width:100%!important;opacity:0}
+.hour.active{border-color:var(--work);box-shadow:0 0 0 2px color-mix(in srgb,var(--work) 20%,transparent)}
+.hour.locked{opacity:.66}
+.progress{height:10px;background:var(--card2);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-top:12px}
+.progress>div{height:100%;background:var(--work);transition:.3s}
+
+.honor-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:13px}
+.honor-item{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card2)}
+.honor-item .label{font-size:12px;color:var(--muted)}
+.honor-item .big{font-size:23px;font-weight:850;margin-top:5px}
+.honor-item .meta{font-size:12px;color:var(--muted);margin-top:4px}
+
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px}
+.day{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;min-height:112px;background:var(--card2)}
+.day.today{border:2px solid var(--accent)}
+.day .name{font-size:12px;color:var(--muted)}
+.day .num{font-size:12px;margin-top:2px}
+.day .hoursnum{font-size:22px;font-weight:800;margin-top:7px}
+.day .bar,.history-bar{height:6px;background:var(--pendingSoft);border-radius:8px;margin-top:6px}
+.day .bar div,.history-bar div{height:100%;background:var(--work);border-radius:8px}
+.rank-chip{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:750;margin-top:7px}
+.chip-pending{background:var(--pendingSoft);color:var(--pending)}
+.chip-good{background:var(--goodSoft);color:var(--good)}
+.chip-pro{background:var(--proSoft);color:var(--pro)}
+.chip-legend{background:var(--legendSoft);color:var(--legend)}
+
+.month-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}
+.month-week{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card2)}
+.month-week .total{font-size:23px;font-weight:800;margin-top:6px}
+
+.history-row{
+  display:grid;
+  grid-template-columns:minmax(150px,1fr) 100px minmax(100px,1fr);
+  gap:12px;
+  align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+}
+.history-row:last-child{border-bottom:0}
+.history-mid{text-align:center}
+.year-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.year-stat{border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--card2);text-align:center}
+.year-stat strong{font-size:22px;display:block}
+.year-stat span{font-size:11px;color:var(--muted)}
+.rank-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.count-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card2)}
+.count-card h3{font-size:14px;margin:0 0 10px}
+.count-line{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px}
+
+
+.prep-options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.prep-option{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--card2)}
+.prep-option-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.prep-option h3{margin:3px 0 0;font-size:18px}
+.prep-kicker{font-size:12px;color:var(--muted)}
+.prep-count{font-weight:850;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 9px;white-space:nowrap}
+.prep-start{margin-top:14px;width:100%}
+.prep-option.exhausted{opacity:.58}
+.prep-live{text-align:center}
+.prep-phase{display:inline-block;margin:0 auto 8px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;background:var(--workSoft);color:var(--work)}
+.prep-phase.break{background:var(--breakSoft);color:var(--break)}
+.prep-progress-wrap{max-width:640px;margin:14px auto 0}
+.prep-usage{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+@media(max-width:700px){
+  .prep-options{grid-template-columns:1fr}
+  .prep-usage{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:430px){
+  .prep-usage{grid-template-columns:1fr}
+}
+
+.dangerbtn{border-color:color-mix(in srgb,var(--danger) 55%,var(--line));color:var(--danger);background:transparent}
+.dangerbtn:hover:not(:disabled){background:color-mix(in srgb,var(--danger) 8%,var(--card))}
+
+
+
+.cloud-status{font-size:12px;line-height:1.8;margin-top:8px;color:var(--muted)}
+.cloud-status.ok{color:var(--good)}
+.cloud-status.warn{color:var(--break)}
+.auth-form{display:grid;gap:10px;margin-top:14px}
+.auth-form input{
+  width:100%;border:1px solid var(--line);background:var(--card);color:var(--text);
+  border-radius:10px;padding:11px;font:inherit;direction:ltr;text-align:left
+}
+.auth-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.cloud-account{border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--card2);margin-top:12px}
+.cloud-email{font-weight:750;direction:ltr;text-align:left;overflow-wrap:anywhere}
+.sync-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sync-chip{display:inline-block;padding:4px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px;margin-top:7px}
+
+.greeting-card{display:flex;justify-content:space-between;gap:16px;align-items:center;background:linear-gradient(135deg,var(--card),var(--card2))}
+.motivation-text{font-size:14px;line-height:1.8;margin-top:6px}
+.greeting-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;min-width:220px}
+.greeting-stats>div{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--card2)}
+.greeting-stats strong{display:block;font-size:20px}
+.greeting-stats span{font-size:11px;color:var(--muted)}
+.settings-grid{display:grid;gap:12px;margin-top:12px}
+.settings-row{border:1px solid var(--line);border-radius:13px;padding:13px;background:var(--card2)}
+.settings-row label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+.settings-row input[type="text"]{width:100%;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:10px;font:inherit}
+.settings-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.backup-summary{font-size:12px;color:var(--muted);line-height:1.8;margin-top:8px}
+@media(max-width:620px){.greeting-card{align-items:flex-start;flex-direction:column}.greeting-stats{width:100%;min-width:0}}
+
+.session-manage-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0
+}
+.manage-session{
+  border:1px solid var(--line);border-radius:13px;padding:10px;background:var(--card2);
+  cursor:pointer;display:flex;gap:8px;align-items:flex-start
+}
+.manage-session.selected{border-color:var(--work);box-shadow:0 0 0 2px color-mix(in srgb,var(--work) 18%,transparent)}
+.manage-session input{margin-top:4px}
+.manage-session .ms-num{font-weight:850;font-size:16px}
+.manage-session .ms-state{font-size:11px;color:var(--muted);margin-top:2px}
+.manage-session .ms-time{font-size:12px;font-weight:700;margin-top:5px}
+.manage-session.active-session{border-color:var(--work)}
+.manage-session.finished-partial{border-color:var(--good)}
+.manage-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+.manage-info{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
+.hour.finished-partial{border-color:var(--good);background:color-mix(in srgb,var(--goodSoft) 60%,var(--card2))}
+.hour.finished-partial .num{color:var(--good)}
+.hour.manual-ready{opacity:.9}
+@media(max-width:650px){
+  .session-manage-grid{grid-template-columns:repeat(3,1fr)}
+  .manage-actions{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+  .session-manage-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+.modal-backdrop{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.58);
+  display:flex;align-items:center;justify-content:center;
+  padding:18px;
+}
+.modal-box{
+  width:min(460px,100%);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 20px 70px rgba(0,0,0,.35);
+}
+.modal-box h3{margin:0 0 8px;font-size:20px}
+.modal-box p{margin:0;color:var(--muted);line-height:1.8;font-size:14px}
+.modal-warning{
+  margin-top:12px!important;
+  padding:10px 12px;
+  border-radius:11px;
+  background:color-mix(in srgb,var(--danger) 8%,var(--card));
+  color:var(--danger)!important;
+  border:1px solid color-mix(in srgb,var(--danger) 25%,var(--line));
+}
+.modal-actions{display:flex;gap:8px;justify-content:flex-start;margin-top:18px;flex-wrap:wrap}
+.confirm-danger{background:var(--danger);border-color:var(--danger);color:white}
+
+.hidden{display:none!important}
+.empty{text-align:center;color:var(--muted);padding:20px}
+@media(max-width:760px){
+  .rank-dashboard,.honor-mini{grid-template-columns:1fr}
+  .hours{grid-template-columns:repeat(4,1fr)}
+  .week-grid{grid-template-columns:repeat(4,1fr)}
+  .month-grid{grid-template-columns:repeat(2,1fr)}
+  .year-summary{grid-template-columns:repeat(2,1fr)}
+  .rank-counts{grid-template-columns:1fr}
+  .history-row{grid-template-columns:1fr 85px}
+  .history-row .history-bar{grid-column:1/-1}
+}
+@media(max-width:430px){
+  .container{padding:12px}
+  h1{font-size:20px}
+  .timer{font-size:43px}
+  .hours{grid-template-columns:repeat(3,1fr)}
+  .week-grid{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:1fr 1fr 1fr}
+  .stat strong{font-size:19px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div>
+    <h1>Achievement Tracker</h1>
+    <div class="subtitle">تهيئة البداية · Live Multi-Device Sync · دخول محفوظ · جلسات Auth مستقرة</div>
+  </div>
+  <div class="header-actions">
+    <button id="cloudBtn" title="الحساب والمزامنة">☁ جارٍ التحقق...</button>
+    <button id="settingsBtn" title="الإعدادات والنسخة الاحتياطية">الإعدادات</button>
+    <button id="miniBtn" title="نافذة مصغرة للمؤقت">نافذة مصغرة</button>
+    <button id="soundBtn" class="soundbtn" title="الصوت">🔔</button>
+    <button id="themeBtn" title="الوضع الداكن">☾</button>
+    <button id="todayBtn">اليوم</button>
+  </div>
+</header>
+
+
+<div class="card greeting-card">
+  <div>
+    <div class="small" id="greetingDate"></div>
+    <h2 id="personalGreeting" style="margin-top:4px">صباح الخير</h2>
+    <div id="motivationText" class="motivation-text"></div>
+  </div>
+  <div class="greeting-stats">
+    <div><strong id="greetingToday">0س</strong><span>اليوم</span></div>
+    <div><strong id="greetingYesterday">0س</strong><span>أمس</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab" data-tab="prep">تهيئة</button>
+  <button class="tab active" data-tab="today">اليوم</button>
+  <button class="tab" data-tab="week">الأسبوع</button>
+  <button class="tab" data-tab="month">الشهر</button>
+  <button class="tab" data-tab="history">السجل</button>
+  <button class="tab" data-tab="year">السنة</button>
+</div>
+
+
+<section id="prep" class="tab-content hidden">
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>تهيئة البداية</h2>
+        <div class="small">جلسات قصيرة للدخول في مود العمل قبل بدء ساعات الإنجاز الأساسية. لا تُضاف إلى عداد الـ12 ساعة.</div>
+      </div>
+    </div>
+
+    <div class="prep-options">
+      <div class="prep-option" id="prepOptionFocus">
+        <div class="prep-option-head">
+          <div>
+            <div class="prep-kicker">تهيئة مركّزة</div>
+            <h3>10 دقائق عمل + 5 دقائق بريك</h3>
+          </div>
+          <div class="prep-count" id="prepCountFocus">0 / 3</div>
+        </div>
+        <div class="small">مناسبة عندما تحتاج دفعة عمل قصيرة ثم مكافأة خفيفة.</div>
+        <button id="startPrepFocus" class="primary prep-start">ابدأ هذه التهيئة</button>
+      </div>
+
+      <div class="prep-option" id="prepOptionEasy">
+        <div class="prep-option-head">
+          <div>
+            <div class="prep-kicker">تهيئة خفيفة</div>
+            <h3>5 دقائق عمل + 10 دقائق بريك</h3>
+          </div>
+          <div class="prep-count" id="prepCountEasy">0 / 3</div>
+        </div>
+        <div class="small">مناسبة عندما تكون البداية ثقيلة وتريد دخولًا أسهل في أجواء العمل.</div>
+        <button id="startPrepEasy" class="primary prep-start">ابدأ هذه التهيئة</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="prep-live">
+      <div id="prepModeLabel" class="timer-label">اختر نوع التهيئة للبدء</div>
+      <div id="prepTimer" class="timer work-mode">10:00</div>
+      <div id="prepPhase" class="prep-phase">جاهز</div>
+
+      <div class="controls">
+        <button id="prepResumeBtn" class="primary" disabled>ابدأ / استئناف</button>
+        <button id="prepPauseBtn" disabled>إيقاف مؤقت</button>
+        <button id="prepCancelBtn" class="dangerbtn" disabled>إلغاء التهيئة</button>
+      </div>
+
+      <div class="prep-progress-wrap">
+        <div class="progress"><div id="prepProgress"></div></div>
+        <div id="prepStatus" class="note">يمكن تكرار كل نوع 3 مرات فقط في اليوم.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>استخدام اليوم</h2>
+    <div class="prep-usage">
+      <div class="stat"><strong id="prepFocusDone">0</strong><span>تهيئة 10+5 مكتملة</span></div>
+      <div class="stat"><strong id="prepEasyDone">0</strong><span>تهيئة 5+10 مكتملة</span></div>
+      <div class="stat"><strong id="prepTotalDone">0</strong><span>إجمالي التهيئات اليوم</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="today" class="tab-content">
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>لوحة الإنجاز</h2>
+        <div class="small" id="achievementDate"></div>
+      </div>
+    </div>
+    <div class="rank-dashboard">
+      <div id="dailyRankCard" class="rank-card rank-pending"></div>
+      <div id="weeklyRankCard" class="rank-card rank-pending"></div>
+      <div id="monthlyRankCard" class="rank-card rank-pending"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2 id="todayTitle"></h2>
+        <div class="small">الساعة التالية تُفتح فقط بعد اكتمال الساعة السابقة.</div>
+      </div>
+      <div class="header-actions">
+        <button id="manageSessionsBtn">إدارة جلسات اليوم</button>
+        <button id="resetTodayBtn" class="dangerbtn">إعادة جلسات اليوم</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><strong id="todayHours">0س 00د</strong><span>وقت العمل اليوم</span></div>
+      <div class="stat"><strong id="todayPercent">0%</strong><span>نسبة اليوم</span></div>
+      <div class="stat"><strong id="monthTotalTop">0س</strong><span>وقت العمل هذا الشهر</span></div>
+    </div>
+
+    <div class="timer-panel">
+      <div id="timerLabel" class="timer-label"></div>
+      <div id="timer" class="timer work-mode">60:00</div>
+      <div class="controls">
+        <button id="startBtn" class="primary">ابدأ</button>
+        <button id="pauseBtn">إيقاف مؤقت</button>
+        <button id="breakBtn" class="breakbtn">Break 10 min</button>
+        <button id="finishSessionBtn">إنهاء الجلسة</button>
+        <button id="returnBtn" class="returnbtn hidden">العودة للجلسة</button>
+      </div>
+      <div id="timerStatus" class="note">ابدأ الساعة الحالية، وسيُسجل الإنجاز تلقائيًا عند اكتمالها.</div>
+      <div id="timerHeartbeat" class="timer-heartbeat">● جاهز</div>
+    </div>
+
+    <div class="hours" id="hours"></div>
+    <div class="progress"><div id="todayProgress"></div></div>
+    <div class="note" style="margin-top:10px">المربع النشط يمتلئ تدريجيًا مع مرور الوقت، ثم يصبح مكتملًا عند انتهاء 60 دقيقة.</div>
+  </div>
+
+  <div class="card">
+    <h2>لوحة الشرف المختصرة</h2>
+    <div class="small">أفضل النتائج المسجلة في هذا الجهاز.</div>
+    <div class="honor-mini">
+      <div class="honor-item" id="bestDayCard"></div>
+      <div class="honor-item" id="bestWeekCard"></div>
+      <div class="honor-item" id="bestMonthCard"></div>
+    </div>
+  </div>
+</section>
+
+<section id="week" class="tab-content hidden">
+  <div class="card">
+    <h2 id="weekTitle"></h2>
+    <div class="stats">
+      <div class="stat"><strong id="weekTotal">0س</strong><span>وقت العمل هذا الأسبوع</span></div>
+      <div class="stat"><strong id="weekAverage">0س</strong><span>متوسط الوقت/اليوم</span></div>
+      <div class="stat"><strong id="weekBest">0س</strong><span>أفضل يوم</span></div>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+</section>
+
+<section id="month" class="tab-content hidden">
+  <div class="card">
+    <h2 id="monthTitle"></h2>
+    <div class="stats">
+      <div class="stat"><strong id="monthTotal">0س</strong><span>إجمالي وقت الشهر</span></div>
+      <div class="stat"><strong id="monthAverage">0س</strong><span>متوسط الأيام المنقضية</span></div>
+      <div class="stat"><strong id="monthBest">0س</strong><span>أفضل يوم</span></div>
+    </div>
+    <div id="monthRankDetail" class="small"></div>
+    <div class="month-grid" id="monthGrid"></div>
+  </div>
+</section>
+
+<section id="history" class="tab-content hidden">
+  <div class="card">
+    <h2>آخر 30 يومًا</h2>
+    <div class="small">كل يوم يحتفظ بإجمالي ساعاته ورتبته النهائية.</div>
+    <div id="historyList"></div>
+  </div>
+</section>
+
+<section id="year" class="tab-content hidden">
+  <div class="card">
+    <h2>لوحة الشرف السنوية</h2>
+    <div class="small">إحصاءات الإنجاز المتراكمة وسجل آخر 12 شهرًا.</div>
+
+    <div class="year-summary">
+      <div class="year-stat"><strong id="allHours">0</strong><span>إجمالي الساعات المسجلة</span></div>
+      <div class="year-stat"><strong id="bestStreak">0</strong><span>أفضل سلسلة أيام ≥ 6 ساعات</span></div>
+      <div class="year-stat"><strong id="legendDays">0</strong><span>أيام أسطورية</span></div>
+      <div class="year-stat"><strong id="legendWeeks">0</strong><span>أسابيع أسطورية</span></div>
+    </div>
+
+    <div class="honor-mini">
+      <div class="honor-item" id="yearBestDay"></div>
+      <div class="honor-item" id="yearBestWeek"></div>
+      <div class="honor-item" id="yearBestMonth"></div>
+    </div>
+
+    <div class="rank-counts">
+      <div class="count-card">
+        <h3>رتب الأيام</h3>
+        <div id="dayRankCounts"></div>
+      </div>
+      <div class="count-card">
+        <h3>رتب الأسابيع</h3>
+        <div id="weekRankCounts"></div>
+      </div>
+      <div class="count-card">
+        <h3>رتب الشهور</h3>
+        <div id="monthRankCounts"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>آخر 12 شهرًا</h2>
+    <div id="yearList"></div>
+  </div>
+</section>
+</div>
+
+
+
+
+
+<div id="cloudModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" style="width:min(620px,100%)">
+    <h3>الحساب والمزامنة السحابية</h3>
+    <p>يظل التطبيق Local-first: يعمل ويحفظ على الجهاز، وعند تسجيل الدخول يزامن بياناتك مع Supabase لتظهر على أجهزتك الأخرى. بعد تسجيل الدخول مرة واحدة على هذا الجهاز، يحاول التطبيق استعادة الجلسة تلقائيًا في كل مرة تفتحه.</p>
+
+    <div id="signedOutCloud">
+      <div class="auth-form">
+        <input id="authEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني">
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="كلمة المرور">
+        <div class="auth-buttons">
+          <button id="signInBtn" class="primary" disabled>تسجيل الدخول</button>
+          <button id="signUpBtn" disabled>إنشاء حساب</button>
+        </div>
+        <div id="authMessage" class="cloud-status">استخدم بريدك وكلمة مرورك. لا تُرسل كلمة المرور لأي شخص.</div>
+      </div>
+    </div>
+
+    <div id="signedInCloud" class="hidden">
+      <div class="cloud-account">
+        <div class="small">الحساب المتصل</div>
+        <div id="cloudEmail" class="cloud-email"></div>
+        <div id="cloudSyncStatus" class="cloud-status"></div>
+        <div class="sync-actions">
+          <button id="syncNowBtn" class="primary">مزامنة الآن</button>
+          <button id="uploadLocalBtn">رفع بيانات هذا الجهاز</button>
+          <button id="downloadCloudBtn">تنزيل أحدث بيانات السحابة</button>
+          <button id="signOutBtn" class="dangerbtn">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="manage-info">
+        المزامنة الحية مفعّلة: افتح التطبيق بالحساب نفسه على أي جهاز، وسيستعيد المؤقت الجاري تلقائيًا من نفس اللحظة. أزرار الرفع والتنزيل تبقى للاستخدام الاحتياطي فقط.
+      </div>
+    </div>
+
+    <div class="modal-actions"><button id="closeCloudBtn">إغلاق</button></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" style="width:min(620px,100%)">
+    <h3>الإعدادات والنسخة الاحتياطية</h3>
+    <p>هذه الخطوة تحمي بياناتك الحالية قبل الربط السحابي. لا يتم حذف أي سجل بمجرد فتح هذه الصفحة.</p>
+    <div class="settings-grid">
+      <div class="settings-row">
+        <label for="profileNameInput">اسمك داخل التطبيق</label>
+        <input id="profileNameInput" type="text" maxlength="40" placeholder="مثال: عبدالله">
+        <div class="settings-actions"><button id="saveProfileBtn" class="primary">حفظ الاسم</button></div>
+      </div>
+      <div class="settings-row">
+        <strong>نسخة احتياطية كاملة</strong>
+        <div id="backupSummary" class="backup-summary"></div>
+        <div class="settings-actions">
+          <button id="exportBackupBtn">تصدير النسخة الاحتياطية</button>
+          <button id="importBackupBtn">استيراد نسخة احتياطية</button>
+          <input id="backupFileInput" type="file" accept=".json,application/json" class="hidden">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions"><button id="closeSettingsBtn">إغلاق</button></div>
+  </div>
+</div>
+
+<div id="manageSessionsModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" style="width:min(700px,100%)">
+    <h3>إدارة جلسات اليوم</h3>
+    <p>حدد جلسة واحدة أو عدة جلسات، ثم اختر الإجراء. التغييرات هنا تخص اليوم الحالي فقط.</p>
+    <div id="manageSessionsGrid" class="session-manage-grid"></div>
+
+    <div class="manage-actions">
+      <button id="jumpSessionBtn">الانتقال إلى الجلسة المحددة</button>
+      <button id="markCompleteBtn">تسجيل المحدد كمكتمل</button>
+      <button id="redoKeepBtn">إعادة دون حذف الإنجاز السابق</button>
+      <button id="redoResetBtn" class="dangerbtn">إعادة المحدد من الصفر</button>
+    </div>
+    <div id="manageInfo" class="manage-info">للانتقال اختر جلسة واحدة فقط. ويمكن تحديد أكثر من جلسة للتسجيل أو الإعادة.</div>
+    <div class="modal-actions">
+      <button id="closeManageBtn">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="finishSessionModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <h3>إنهاء الجلسة الحالية</h3>
+    <p id="finishSessionText"></p>
+    <p class="modal-warning">اختر طريقة احتساب الجلسة. الخيار الأول يحفظ الوقت الفعلي فقط، والثاني يكملها إلى 60 دقيقة.</p>
+    <div class="modal-actions">
+      <button id="finishActualBtn">إنهاء وحفظ الوقت الفعلي</button>
+      <button id="finishFullBtn" class="primary">اعتبارها 60 دقيقة</button>
+      <button id="cancelFinishBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="resetModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+    <h3 id="resetModalTitle">إعادة جلسات اليوم؟</h3>
+    <p>سيتم حذف وقت الإنجاز المسجل لليوم الحالي فقط، وإعادة المؤقت إلى الساعة الأولى عند 60:00.</p>
+    <p class="modal-warning">لن تتأثر بيانات الأيام السابقة، لكن لا يمكن التراجع عن إعادة بيانات اليوم بعد التأكيد.</p>
+    <div class="modal-actions">
+      <button id="confirmResetBtn" class="confirm-danger">نعم، ابدأ اليوم من جديد</button>
+      <button id="cancelResetBtn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const DATA_KEY="achievement_tracker_v4_data";
+const TIMER_KEY="achievement_tracker_v4_timer";
+const TIMER_MIGRATION_KEY="achievement_tracker_v5_timer_migrated";
+const THEME_KEY="achievement_theme";
+const SOUND_KEY="achievement_sound";
+const PROFILE_KEY="achievement_profile_v1";
+const SUPABASE_URL="https://zhvrdqgztvsosdkoxvxj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_ZAdNZphn9qwnlfwk5Z5SPg_ab1uWOPF";
+const SUPABASE_AUTH_STORAGE_KEY="achievement_tracker_supabase_auth";
+const MAX=12;
+const WORK_SECONDS=3600;
+const BREAK_SECONDS=600;
+const DAY_SECONDS=MAX*WORK_SECONDS;
+const PREP_KEY="achievement_tracker_v7_prep";
+const PREP_LIMIT=3;
+const PREP_TYPES={
+  focus:{work:600,break:300,label:"10 دقائق عمل + 5 دقائق بريك"},
+  easy:{work:300,break:600,label:"5 دقائق عمل + 10 دقائق بريك"}
+};
+
+const DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+function loadLegacyData(){
+  const current=localStorage.getItem(DATA_KEY);
+  if(current) return JSON.parse(current);
+  const legacy=localStorage.getItem("achievement_tracker_v3") || localStorage.getItem("achievement_tracker_v1");
+  if(legacy){
+    const parsed=JSON.parse(legacy);
+    localStorage.setItem(DATA_KEY,JSON.stringify(parsed));
+    return parsed;
+  }
+  return {};
+}
+function loadLegacyTimer(){
+  const current=localStorage.getItem(TIMER_KEY);
+  if(current) return JSON.parse(current);
+  const legacy=localStorage.getItem("achievement_timer_v1");
+  if(legacy){
+    const parsed=JSON.parse(legacy);
+    localStorage.setItem(TIMER_KEY,JSON.stringify(parsed));
+    return parsed;
+  }
+  return null;
+}
+
+let data=loadLegacyData();
+let session=loadLegacyTimer();
+let prepState=JSON.parse(localStorage.getItem(PREP_KEY)||"null");
+let audioCtx=null;
+let profile=JSON.parse(localStorage.getItem(PROFILE_KEY)||'{"name":"عبدالله"}');
+let cloudClient=null;
+let cloudUser=null;
+let cloudApplying=false;
+let cloudSyncTimer=null;
+let cloudLastSync=null;
+let cloudAuthRestored=false;
+let supabaseInitPromise=null;
+let cloudTimerUpdatedAt=0;
+let cloudStateSig=null;
+let cloudStatePushTimer=null;
+let cloudPollBusy=false;
+let cloudForceOverwriteDates=new Set();
+let miniTimerWindow=null;
+let miniTimerMode="none";
+
+function pad(n){return String(n).padStart(2,"0")}
+function keyFromDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function dateFromKey(k){const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)}
+function now(){return new Date()}
+function todayKey(){return keyFromDate(now())}
+function fmtDate(d){return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
+function fmtShort(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`}
+function monthDays(y,m){return new Date(y,m+1,0).getDate()}
+function saveData(){localStorage.setItem(DATA_KEY,JSON.stringify(data));queueCloudSync()}
+function allRecordKeys(){return Object.keys(data).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)).sort()}
+
+function emptyDaySessions(){
+  return Array.from({length:MAX},()=>({seconds:0,closed:false,bonusSeconds:0}));
+}
+function normalizeSessionItem(item){
+  if(!item || typeof item!=="object") item={};
+  return {
+    seconds:Math.max(0,Math.min(WORK_SECONDS,Math.round(Number(item.seconds)||0))),
+    closed:!!item.closed,
+    bonusSeconds:Math.max(0,Math.round(Number(item.bonusSeconds)||0))
+  };
+}
+function migrateTotalToSessions(total,k){
+  total=Math.max(0,Math.round(total||0));
+  const items=emptyDaySessions();
+  let base=Math.min(total,DAY_SECONDS);
+  const bonus=Math.max(0,total-DAY_SECONDS);
+
+  for(let i=0;i<MAX;i++){
+    const give=Math.min(WORK_SECONDS,base);
+    items[i].seconds=give;
+    items[i].closed=give>=WORK_SECONDS || (k!==todayKey() && give>0);
+    base-=give;
+    if(base<=0) break;
+  }
+  if(bonus>0) items[MAX-1].bonusSeconds=bonus;
+  return items;
+}
+function sessionTotal(items){
+  return items.reduce((sum,s)=>sum+(Number(s.seconds)||0)+(Number(s.bonusSeconds)||0),0);
+}
+function ensureDayRecord(k=todayKey()){
+  let v=data[k];
+  if(typeof v==="number") v={workSeconds:Math.max(0,Math.round(v*WORK_SECONDS))};
+  if(!v || typeof v!=="object") v={workSeconds:0};
+
+  let legacyTotal;
+  if(typeof v.workSeconds==="number") legacyTotal=Math.max(0,Math.round(v.workSeconds));
+  else legacyTotal=Math.max(0,Math.round((Number(v.hours)||0)*WORK_SECONDS));
+
+  if(!Array.isArray(v.sessions) || v.sessions.length!==MAX){
+    v.sessions=migrateTotalToSessions(legacyTotal,k);
+  }else{
+    v.sessions=v.sessions.map(normalizeSessionItem);
+  }
+
+  v.workSeconds=sessionTotal(v.sessions);
+  v.hours=Math.floor(Math.min(v.workSeconds,DAY_SECONDS)/WORK_SECONDS);
+  data[k]=v;
+  return v;
+}
+function syncDayRecord(k=todayKey(),save=true){
+  const v=ensureDayRecord(k);
+  v.workSeconds=sessionTotal(v.sessions);
+  v.hours=Math.floor(Math.min(v.workSeconds,DAY_SECONDS)/WORK_SECONDS);
+  if(save){
+    v.updatedAt=new Date().toISOString();
+    saveData();
+  }
+  return v;
+}
+function normalizeData(){
+  let changed=false;
+  for(const k of Object.keys(data)){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+    const before=JSON.stringify(data[k]);
+    ensureDayRecord(k);
+    if(before!==JSON.stringify(data[k])) changed=true;
+  }
+  if(changed) saveData();
+}
+function getDaySessions(k=todayKey()){
+  return ensureDayRecord(k).sessions;
+}
+function getWorkSeconds(k=todayKey()){
+  const v=data[k];
+  if(v==null) return 0;
+  return syncDayRecord(k,false).workSeconds;
+}
+function setWorkSeconds(seconds,k=todayKey()){
+  seconds=Math.max(0,Math.round(seconds));
+  const v=ensureDayRecord(k);
+  v.sessions=migrateTotalToSessions(seconds,k);
+  syncDayRecord(k,true);
+}
+function getHours(k=todayKey()){return Math.floor(Math.min(getWorkSeconds(k),DAY_SECONDS)/WORK_SECONDS)}
+function getHoursValue(k=todayKey()){return getWorkSeconds(k)/WORK_SECONDS}
+function getSessionItem(index,k=todayKey()){
+  const items=getDaySessions(k);
+  return items[Math.max(0,Math.min(MAX-1,index))];
+}
+function sessionBaseProgress(index,k=todayKey()){return getSessionItem(index,k).seconds}
+function firstOpenSession(k=todayKey(),startAt=0){
+  const items=getDaySessions(k);
+  for(let i=startAt;i<MAX;i++) if(!items[i].closed) return i;
+  for(let i=0;i<startAt;i++) if(!items[i].closed) return i;
+  return -1;
+}
+function completeSessionRecord(index,k=todayKey()){
+  const s=getSessionItem(index,k);
+  s.seconds=WORK_SECONDS;s.closed=true;
+  syncDayRecord(k,true);
+}
+function resetSessionRecord(index,k=todayKey()){
+  const s=getSessionItem(index,k);
+  s.seconds=0;s.closed=false;s.bonusSeconds=0;
+  cloudForceOverwriteDates.add(k);
+  syncDayRecord(k,true);
+}
+function closeSessionAtActual(index,k=todayKey()){
+  const s=getSessionItem(index,k);
+  s.closed=true;
+  syncDayRecord(k,true);
+}
+function formatDuration(seconds,compact=false){
+  seconds=Math.max(0,Math.round(seconds));
+  const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;
+  if(compact){
+    if(h>0) return m>0?`${h}س ${m}د`:`${h}س`;
+    return `${m}د`;
+  }
+  return `${h}س ${pad(m)}د ${pad(s)}ث`;
+}
+function formatHoursValue(hours){return formatDuration(hours*WORK_SECONDS,true)}
+
+function startOfWeek(d){
+  const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-x.getDay());return x;
+}
+function weekDates(d){
+  const s=startOfWeek(d);
+  return Array.from({length:7},(_,i)=>{const x=new Date(s);x.setDate(s.getDate()+i);return x});
+}
+function weekSeconds(d){return weekDates(d).reduce((a,x)=>a+getWorkSeconds(keyFromDate(x)),0)}
+function weekTotal(d){return weekSeconds(d)/WORK_SECONDS}
+function monthSeconds(d){
+  let t=0;
+  for(let day=1;day<=monthDays(d.getFullYear(),d.getMonth());day++){
+    t+=getWorkSeconds(keyFromDate(new Date(d.getFullYear(),d.getMonth(),day)));
+  }
+  return t;
+}
+function monthTotal(d){return monthSeconds(d)/WORK_SECONDS}
+
+function rankInfo(value,max,type="daily"){
+  let good,pro,legend;
+  if(type==="daily"){good=6;pro=9;legend=12}
+  else if(type==="weekly"){good=42;pro=63;legend=84}
+  else{
+    const days=max/12;
+    good=days*6;pro=days*9;legend=max;
+  }
+  if(value>=legend) return {key:"legend",name:"أسطوري",icon:"🏆",class:"rank-legend",chip:"chip-legend"};
+  if(value>=pro) return {key:"pro",name:"محترف",icon:"◆",class:"rank-pro",chip:"chip-pro"};
+  if(value>=good) return {key:"good",name:"إنجاز جيد",icon:"●",class:"rank-good",chip:"chip-good"};
+  return {key:"pending",name:"قيد الإنجاز",icon:"○",class:"rank-pending",chip:"chip-pending"};
+}
+function rankChip(value,max,type){const r=rankInfo(value,max,type);return `<span class="rank-chip ${r.chip}">${r.name}</span>`}
+
+function currentMonthForecast(){
+  const d=now(),elapsed=d.getDate(),total=monthTotal(d),avg=elapsed?total/elapsed:0;
+  if(avg>=12) return "أسطوري";
+  if(avg>=9) return "محترف";
+  if(avg>=6) return "إنجاز جيد";
+  return "قيد الإنجاز";
+}
+function renderRankCard(id,period,value,max,type,extra=""){
+  const r=rankInfo(value,max,type),el=document.getElementById(id);
+  el.className=`rank-card ${r.class}`;
+  el.innerHTML=`<div class="rank-period">${period}</div><div class="rank-icon">${r.icon}</div><div class="rank-name">${r.name}</div><div class="rank-value">${formatHoursValue(value)} / ${max} ساعة</div><div class="rank-extra">${extra}</div>`;
+}
+function renderAchievementDashboard(){
+  const d=now(),dayH=getHoursValue(),weekH=weekTotal(d),mTotal=monthTotal(d),mMax=monthDays(d.getFullYear(),d.getMonth())*12;
+  document.getElementById("achievementDate").textContent=fmtDate(d);
+  renderRankCard("dailyRankCard","اليوم",dayH,12,"daily",`${Math.min(100,Math.round(dayH/12*100))}% من الهدف`);
+  renderRankCard("weeklyRankCard","الأسبوع",weekH,84,"weekly",`${Math.min(100,Math.round(weekH/84*100))}% من الهدف`);
+  renderRankCard("monthlyRankCard","الشهر",mTotal,mMax,"monthly",`المستوى المتوقع: ${currentMonthForecast()}`);
+}
+
+
+function saveProfile(){localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));queueCloudSync()}
+function profileName(){const n=(profile?.name||"").trim();return n||"عبدالله"}
+function yesterdayKey(){const d=now();d.setDate(d.getDate()-1);return keyFromDate(d)}
+function greetingByHour(){const h=now().getHours();return h<12?"صباح الخير":h<18?"مساء الخير":"مساء الإنجاز"}
+function motivationForToday(){
+  const name=profileName(),today=getWorkSeconds(),yesterday=getWorkSeconds(yesterdayKey()),h=today/WORK_SECONDS;
+  if(h>=12) return `يوم أسطوري يا ${name}. اكتمل هدف اليوم: 12 ساعة.`;
+  if(h>=9) return `أداء محترف يا ${name}، بقي القليل على الهدف الكامل.`;
+  if(h>=6) return `إنجاز جيد يا ${name}، تجاوزت نصف الطريق اليوم.`;
+  if(h>=3) return `بداية جيدة يا ${name}. ركز على الجلسة الحالية فقط واستمر خطوة بخطوة.`;
+  if(h>0) return `بدأت اليوم يا ${name}. لا تفكر في 12 ساعة كلها؛ أكمل الجلسة الحالية فقط.`;
+  if(yesterday>=9*WORK_SECONDS) return `أمس كان قويًا يا ${name}. ابدأ اليوم بهدوء وحافظ على الاستمرارية.`;
+  if(yesterday>0) return `أمس أنجزت ${formatDuration(yesterday,true)}. اليوم فرصة جديدة يا ${name}، وبإذن الله تعوض وتتحسن.`;
+  return `ابدأ بجلسة واحدة فقط يا ${name}. التقدم اليومي يتراكم.`;
+}
+function renderPersonalGreeting(){
+  const d=now();
+  document.getElementById("greetingDate").textContent=fmtDate(d);
+  document.getElementById("personalGreeting").textContent=`${greetingByHour()} يا ${profileName()}`;
+  document.getElementById("motivationText").textContent=motivationForToday();
+  document.getElementById("greetingToday").textContent=formatDuration(getWorkSeconds(),true);
+  document.getElementById("greetingYesterday").textContent=formatDuration(getWorkSeconds(yesterdayKey()),true);
+}
+function openSettings(){
+  document.getElementById("profileNameInput").value=profileName();
+  document.getElementById("backupSummary").textContent=`سيتم حفظ سجل الأيام والجلسات والتهيئة والإعدادات في ملف JSON واحد. عدد الأيام المسجلة: ${allRecordKeys().length}.`;
+  const m=document.getElementById("settingsModal");m.classList.remove("hidden");m.setAttribute("aria-hidden","false");
+}
+function closeSettings(){const m=document.getElementById("settingsModal");m.classList.add("hidden");m.setAttribute("aria-hidden","true")}
+function saveProfileFromSettings(){
+  const name=document.getElementById("profileNameInput").value.trim();
+  profile={...profile,name:name||"عبدالله"};saveProfile();renderPersonalGreeting();
+  document.getElementById("backupSummary").textContent=`تم حفظ الاسم: ${profileName()}.`;
+}
+function buildBackupObject(){
+  if(session?.running) consumeElapsed();
+  return {app:"Achievement Tracker",backupVersion:1,exportedAt:new Date().toISOString(),profile,data,timer:session,prepState,theme:localStorage.getItem(THEME_KEY),sound:localStorage.getItem(SOUND_KEY)};
+}
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(buildBackupObject(),null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=`achievement-tracker-backup-${todayKey()}.json`;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  document.getElementById("backupSummary").textContent="تم إنشاء النسخة الاحتياطية. احتفظ بالملف في مكان آمن.";
+}
+function importBackupFile(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const b=JSON.parse(reader.result);
+      if(!b||b.app!=="Achievement Tracker"||!b.data){alert("ملف النسخة الاحتياطية غير صالح.");return}
+      const count=Object.keys(b.data).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)).length;
+      if(!confirm(`سيتم استبدال بيانات هذا المتصفح بنسخة تحتوي على ${count} يوم مسجل. هل تريد المتابعة؟`)) return;
+      data=b.data||{};profile=b.profile||{name:"عبدالله"};session=b.timer||null;prepState=b.prepState||freshPrepState();
+      saveData();saveProfile();localStorage.setItem(PREP_KEY,JSON.stringify(prepState));
+      if(session) persistSession(); else localStorage.removeItem(TIMER_KEY);
+      if(b.theme) localStorage.setItem(THEME_KEY,b.theme);
+      if(b.sound) localStorage.setItem(SOUND_KEY,b.sound);
+      normalizeData();initSession();normalizePrepState();renderAll();openSettings();
+      document.getElementById("backupSummary").textContent=`تم الاستيراد بنجاح. الأيام المستعادة: ${count}.`;
+    }catch(e){alert("تعذر قراءة النسخة الاحتياطية.");}
+    document.getElementById("backupFileInput").value="";
+  };
+  reader.readAsText(file);
+}
+
+function cloudReady(){return !!(cloudClient&&cloudUser)}
+function queueCloudSync(){
+  if(cloudApplying || !cloudReady()) return;
+
+  /* أثناء عمل المؤقت لا نرفع daily_records كل ثانية.
+     timer_state يحتفظ بمرساة زمنية مشتركة، لذلك أي جهاز يستطيع
+     حساب نفس الوقت من started_at دون مضاعفة الوقت. */
+  if(session?.running) return;
+
+  if(cloudSyncTimer) return;
+  cloudSyncTimer=setTimeout(async()=>{
+    cloudSyncTimer=null;
+    try{await syncDataOnlyToCloud()}catch(e){setCloudStatus(`تعذر الحفظ السحابي: ${e.message||e}`,"warn")}
+  },1200);
+}
+
+function sessionCloudSignature(){
+  if(!session) return "none";
+  return JSON.stringify({
+    date:session.date||todayKey(),
+    mode:session.mode||"work",
+    taskMode:session.taskMode||"base",
+    activeIndex:Number.isInteger(session.activeIndex)?session.activeIndex:null,
+    redoQueue:Array.isArray(session.redoQueue)?session.redoQueue:[],
+    running:!!session.running,
+    remaining:session.running?null:Math.round(session.remaining||0),
+    workRemaining:session.running?null:Math.round(session.workRemaining||0)
+  });
+}
+
+function queueSignificantCloudState(){
+  if(cloudApplying || !cloudReady()) return;
+  if(cloudStatePushTimer) clearTimeout(cloudStatePushTimer);
+  cloudStatePushTimer=setTimeout(async()=>{
+    cloudStatePushTimer=null;
+    try{await syncSignificantStateToCloud()}catch(e){setCloudStatus(`تعذر تحديث المؤقت السحابي: ${e.message||e}`,"warn")}
+  },250);
+}
+
+function setCloudStatus(text,kind=""){
+  const el=document.getElementById("cloudSyncStatus");
+  if(el){el.textContent=text;el.className="cloud-status "+kind}
+  const b=document.getElementById("cloudBtn");
+  if(b){
+    b.textContent=cloudUser?"☁ متصل":"☁ غير متصل";
+    b.title=cloudUser?(cloudLastSync?`آخر مزامنة: ${cloudLastSync}`:"متصل بـ Supabase"):"الحساب والمزامنة";
+  }
+}
+function withTimeout(promise,ms=15000,label="العملية"){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error(`${label} استغرقت وقتًا أطول من المتوقع. حاول مرة أخرى.`)),ms))
+  ]);
+}
+function setAuthBusy(busy,text=""){
+  const a=document.getElementById("signInBtn"),b=document.getElementById("signUpBtn"),m=document.getElementById("authMessage");
+  if(a)a.disabled=busy;if(b)b.disabled=busy;if(m&&text)m.textContent=text;
+}
+
+function loadExternalScript(src,timeout=12000){
+  return new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(s=>s.src===src);
+    if(existing && window.supabase?.createClient){resolve();return}
+
+    const s=document.createElement("script");
+    s.src=src;
+    s.async=true;
+    s.crossOrigin="anonymous";
+
+    let done=false;
+    const finish=(ok,err)=>{
+      if(done)return;done=true;
+      clearTimeout(timer);
+      ok?resolve():reject(err||new Error("تعذر تحميل المكتبة"));
+    };
+
+    s.onload=()=>finish(!!window.supabase?.createClient,new Error("تم تحميل الملف لكن Supabase غير متاح"));
+    s.onerror=()=>finish(false,new Error("فشل تحميل مكتبة Supabase من "+src));
+    const timer=setTimeout(()=>finish(false,new Error("انتهت مهلة تحميل مكتبة Supabase")),timeout);
+    document.head.appendChild(s);
+  });
+}
+
+async function ensureSupabaseSdk(){
+  if(window.supabase?.createClient) return true;
+
+  const sources=[
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",
+    "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+  ];
+
+  let lastError=null;
+  for(const src of sources){
+    try{
+      await loadExternalScript(src);
+      if(window.supabase?.createClient) return true;
+    }catch(e){lastError=e}
+  }
+  throw lastError||new Error("تعذر تحميل مكتبة Supabase.");
+}
+
+
+function clearStoredSupabaseAuth(){
+  try{
+    localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+    Object.keys(localStorage).forEach(k=>{
+      if(k.startsWith("sb-") && k.includes("auth-token")) localStorage.removeItem(k);
+    });
+  }catch(e){}
+  cloudUser=null;
+  cloudAuthRestored=true;
+  updateCloudUI();
+}
+
+async function validateRecoveredSession(sess){
+  if(!sess) return null;
+  try{
+    const {data,error}=await withTimeout(cloudClient.auth.getUser(),10000,"التحقق من جلسة الدخول");
+    if(error || !data?.user){
+      clearStoredSupabaseAuth();
+      return null;
+    }
+    return sess;
+  }catch(e){
+    /* انقطاع الإنترنت لا يعني أن الجلسة تالفة، لذلك لا نمسحها هنا */
+    return sess;
+  }
+}
+
+async function initSupabase(){
+  if(supabaseInitPromise) return supabaseInitPromise;
+
+  supabaseInitPromise=(async()=>{
+    const authMsg=document.getElementById("authMessage");
+    try{
+      if(authMsg) authMsg.textContent="جارٍ تجهيز الاتصال بـ Supabase...";
+      await ensureSupabaseSdk();
+
+      cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true,
+          storage:window.localStorage,
+          storageKey:SUPABASE_AUTH_STORAGE_KEY
+        }
+      });
+
+      document.getElementById("signInBtn").disabled=false;
+      document.getElementById("signUpBtn").disabled=false;
+      if(authMsg) authMsg.textContent="الاتصال جاهز. سجّل الدخول أو أنشئ حسابًا.";
+
+      cloudClient.auth.onAuthStateChange((event,sess)=>{
+        cloudUser=sess?.user||null;
+        cloudAuthRestored=true;
+
+        if(event==="SIGNED_OUT"){
+          cloudUser=null;
+          cloudLastSync=null;
+        }
+
+        updateCloudUI();
+
+        if(event==="SIGNED_IN" && cloudUser){
+          startLiveCloudPolling();
+          setTimeout(()=>handleCloudLogin(),0);
+        }
+      });
+
+      try{
+        const {data:res}=await withTimeout(cloudClient.auth.getSession(),10000,"استعادة جلسة الدخول");
+        let sess=res?.session||null;
+
+        if(!sess){
+          try{
+            const refreshed=await withTimeout(cloudClient.auth.refreshSession(),10000,"تجديد جلسة الدخول");
+            sess=refreshed?.data?.session||null;
+          }catch(e){}
+        }
+
+        sess=await validateRecoveredSession(sess);
+        cloudUser=sess?.user||null;
+        cloudAuthRestored=true;
+        updateCloudUI();
+        if(cloudUser){startLiveCloudPolling();setTimeout(()=>handleCloudLogin(),0);}
+      }catch(e){
+        cloudAuthRestored=true;
+        updateCloudUI();
+        if(authMsg) authMsg.textContent=`تعذر استعادة جلسة الدخول: ${e.message||e}`;
+      }
+
+      return true;
+    }catch(e){
+      cloudClient=null;
+      cloudAuthRestored=true;
+      updateCloudUI();
+      document.getElementById("signInBtn").disabled=true;
+      document.getElementById("signUpBtn").disabled=true;
+      if(authMsg){
+        authMsg.textContent=`تعذر تجهيز الاتصال السحابي: ${e.message||e}. تأكد من اتصال الإنترنت ثم أعد فتح التطبيق.`;
+      }
+      return false;
+    }
+  })();
+
+  return supabaseInitPromise;
+}
+
+function updateCloudUI(){
+  const out=document.getElementById("signedOutCloud"),inside=document.getElementById("signedInCloud");
+  if(!out||!inside) return;
+  out.classList.toggle("hidden",!!cloudUser);
+  inside.classList.toggle("hidden",!cloudUser);
+  if(cloudUser){
+    document.getElementById("cloudEmail").textContent=cloudUser.email||cloudUser.id;
+    setCloudStatus(cloudLastSync?`Live Sync · آخر تحديث ${cloudLastSync}`:"متصل · Live Sync يعمل","ok");
+  }else{
+    const b=document.getElementById("cloudBtn");
+    if(b)b.textContent=cloudAuthRestored?"☁ غير متصل":"☁ جارٍ التحقق...";
+  }
+}
+function openCloud(){
+  updateCloudUI();
+  if(!cloudClient){
+    supabaseInitPromise=null;
+    initSupabase();
+  }
+  const m=document.getElementById("cloudModal");
+  m.classList.remove("hidden");m.setAttribute("aria-hidden","false");
+}
+function closeCloud(){
+  const m=document.getElementById("cloudModal");
+  m.classList.add("hidden");m.setAttribute("aria-hidden","true");
+}
+async function signInCloud(){
+  if(cloudUser){
+    try{
+      const {data,error}=await cloudClient.auth.getUser();
+      if(error || !data?.user) clearStoredSupabaseAuth();
+    }catch(e){}
+  }
+  if(!cloudClient){
+    const ok=await initSupabase();
+    if(!ok||!cloudClient){
+      document.getElementById("authMessage").textContent="الاتصال بـ Supabase غير جاهز. تأكد من الإنترنت وأعد المحاولة.";
+      return;
+    }
+  }
+  const email=document.getElementById("authEmail").value.trim();
+  const password=document.getElementById("authPassword").value;
+  const msg=document.getElementById("authMessage");
+  if(!email||!password){msg.textContent="اكتب البريد وكلمة المرور.";return}
+  setAuthBusy(true,"جارٍ تسجيل الدخول...");
+  try{
+    const {data:res,error}=await withTimeout(cloudClient.auth.signInWithPassword({email,password}),15000,"تسجيل الدخول");
+    if(error){msg.textContent=`فشل تسجيل الدخول: ${error.message}. إذا كنت حذفت الحساب من Supabase، استخدم «إنشاء حساب» لإعادة إنشائه.`;return}
+    cloudUser=res?.user||res?.session?.user||cloudUser;
+    msg.textContent="تم تسجيل الدخول بنجاح.";
+    updateCloudUI();
+    if(cloudUser)setTimeout(()=>handleCloudLogin(),0);
+  }catch(e){msg.textContent=`تعذر تسجيل الدخول: ${e.message||e}`}
+  finally{setAuthBusy(false)}
+}
+async function signUpCloud(){
+  if(cloudUser){
+    try{
+      const {data,error}=await cloudClient.auth.getUser();
+      if(error || !data?.user) clearStoredSupabaseAuth();
+    }catch(e){}
+  }
+  if(!cloudClient){
+    const ok=await initSupabase();
+    if(!ok||!cloudClient){
+      document.getElementById("authMessage").textContent="الاتصال بـ Supabase غير جاهز. تأكد من الإنترنت وأعد المحاولة.";
+      return;
+    }
+  }
+  const email=document.getElementById("authEmail").value.trim();
+  const password=document.getElementById("authPassword").value;
+  const msg=document.getElementById("authMessage");
+  if(!email||password.length<6){msg.textContent="اكتب بريدًا صحيحًا وكلمة مرور من 6 أحرف على الأقل.";return}
+  setAuthBusy(true,"جارٍ إنشاء الحساب...");
+  try{
+    const {data:res,error}=await withTimeout(cloudClient.auth.signUp({email,password}),15000,"إنشاء الحساب");
+    if(error){msg.textContent=`تعذر إنشاء الحساب: ${error.message}`;return}
+    cloudUser=res?.session?.user||res?.user||cloudUser;
+    if(res?.session){
+      msg.textContent="تم إنشاء الحساب وتسجيل الدخول مباشرة.";
+      updateCloudUI();
+      setTimeout(()=>handleCloudLogin(),0);
+    }else if(res?.user){
+      msg.textContent="تم إنشاء الحساب، لكن لم تُنشأ جلسة دخول. جرّب تسجيل الدخول بنفس البريد وكلمة المرور.";
+    }else{
+      msg.textContent="انتهى طلب إنشاء الحساب بدون جلسة. جرّب تسجيل الدخول الآن.";
+    }
+  }catch(e){msg.textContent=`تعذر إنشاء الحساب: ${e.message||e}`}
+  finally{setAuthBusy(false)}
+}
+async function signOutCloud(){
+  if(session?.running) pauseTimer();
+  await syncCurrentToCloud().catch(()=>{});
+  await cloudClient.auth.signOut();
+  cloudUser=null;cloudLastSync=null;updateCloudUI();
+}
+function localRecordToCloud(k){
+  const v=ensureDayRecord(k);
+  return {
+    user_id:cloudUser.id,
+    record_date:k,
+    work_seconds:v.workSeconds||0,
+    sessions:v.sessions||[],
+    prep_state:k===todayKey()?(prepState||{}):(v.prepState||{}),
+    updated_at:v.updatedAt||new Date().toISOString()
+  };
+}
+function normalizeCloudSessionItem(item){
+  return normalizeSessionItem(item||{});
+}
+function mergeSessionArraysMax(localItems,remoteItems){
+  const l=Array.isArray(localItems)?localItems:[];
+  const r=Array.isArray(remoteItems)?remoteItems:[];
+  return Array.from({length:MAX},(_,i)=>{
+    const a=normalizeCloudSessionItem(l[i]),b=normalizeCloudSessionItem(r[i]);
+    return {
+      seconds:Math.max(a.seconds,b.seconds),
+      closed:a.closed||b.closed,
+      bonusSeconds:Math.max(a.bonusSeconds,b.bonusSeconds)
+    };
+  });
+}
+async function upsertDayCloud(k,{force=false}={}){
+  const local=localRecordToCloud(k);
+  const forced=force||cloudForceOverwriteDates.has(k);
+
+  if(!forced){
+    const {data:remote,error:readError}=await cloudClient.from("daily_records")
+      .select("work_seconds,sessions,prep_state,updated_at")
+      .eq("user_id",cloudUser.id).eq("record_date",k).maybeSingle();
+    if(readError) throw readError;
+
+    if(remote){
+      const mergedSessions=mergeSessionArraysMax(local.sessions,remote.sessions);
+      local.sessions=mergedSessions;
+      local.work_seconds=sessionTotal(mergedSessions);
+      if(k!==todayKey() && remote.prep_state && Object.keys(remote.prep_state).length){
+        local.prep_state=remote.prep_state;
+      }
+
+      /* أبقِ النسخة المحلية متوافقة مع نتيجة الدمج. */
+      data[k]={
+        ...(data[k]||{}),
+        sessions:mergedSessions,
+        workSeconds:local.work_seconds,
+        hours:Math.floor(Math.min(local.work_seconds,DAY_SECONDS)/WORK_SECONDS),
+        prepState:local.prep_state,
+        updatedAt:new Date().toISOString()
+      };
+      local.updated_at=data[k].updatedAt;
+      localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    }
+  }else{
+    local.updated_at=new Date().toISOString();
+    if(data[k]) data[k].updatedAt=local.updated_at;
+    cloudForceOverwriteDates.delete(k);
+  }
+
+  const {error}=await cloudClient.from("daily_records").upsert(local,{onConflict:"user_id,record_date"});
+  if(error) throw error;
+}
+async function upsertProfileCloud(){
+  const row={
+    user_id:cloudUser.id,
+    display_name:profileName(),
+    daily_goal_seconds:DAY_SECONDS,
+    updated_at:new Date().toISOString()
+  };
+  const {error}=await cloudClient.from("profiles").upsert(row,{onConflict:"user_id"});
+  if(error) throw error;
+}
+async function upsertTimerCloud(){
+  initSession();
+  const updatedAt=new Date().toISOString();
+  const row={
+    user_id:cloudUser.id,
+    record_date:session.date||todayKey(),
+    mode:session.mode||"work",
+    task_mode:session.taskMode||"base",
+    active_index:Number.isInteger(session.activeIndex)?session.activeIndex:null,
+    redo_queue:Array.isArray(session.redoQueue)?session.redoQueue:[],
+    remaining_seconds:Math.max(0,Math.round(session.remaining||0)),
+    work_remaining_seconds:Math.max(0,Math.round(session.workRemaining||0)),
+    running:!!session.running,
+    started_at:session.running&&Number.isFinite(session.lastTick)?new Date(session.lastTick).toISOString():null,
+    updated_at:updatedAt
+  };
+  const {error}=await cloudClient.from("timer_state").upsert(row,{onConflict:"user_id"});
+  if(error) throw error;
+  cloudTimerUpdatedAt=Date.parse(updatedAt)||Date.now();
+  cloudStateSig=sessionCloudSignature();
+}
+async function syncDataOnlyToCloud(){
+  if(!cloudReady()||cloudApplying) return;
+  setCloudStatus("جارٍ حفظ البيانات...");
+  await upsertProfileCloud();
+  await upsertDayCloud(todayKey());
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`Live Sync · ${cloudLastSync}`,"ok");
+}
+async function syncSignificantStateToCloud(){
+  if(!cloudReady()||cloudApplying) return;
+  setCloudStatus("جارٍ تحديث الحالة الحية...");
+  await upsertProfileCloud();
+  await upsertDayCloud(todayKey());
+  await upsertTimerCloud();
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`Live Sync · ${cloudLastSync}`,"ok");
+}
+async function syncCurrentToCloud(){
+  if(!cloudReady()||cloudApplying) return;
+
+  /* المزامنة اليدوية تعيد تثبيت مرساة المؤقت عند اللحظة الحالية. */
+  if(session?.running) consumeElapsed();
+  setCloudStatus("جارٍ المزامنة...");
+  await upsertProfileCloud();
+  await upsertDayCloud(todayKey());
+  await upsertTimerCloud();
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`تمت المزامنة ${cloudLastSync}`,"ok");
+}
+
+async function uploadAllLocalToCloud(){
+  if(!cloudReady()) return;
+  if(session?.running) consumeElapsed();
+  if(!confirm(`سيتم رفع ${allRecordKeys().length} يومًا من هذا الجهاز إلى حسابك السحابي. السجلات ذات التاريخ نفسه ستُستبدل بنسخة هذا الجهاز. هل تريد المتابعة؟`)) return;
+  setCloudStatus("جارٍ رفع سجل هذا الجهاز...");
+  await upsertProfileCloud();
+  const rows=allRecordKeys().map(localRecordToCloud);
+  if(rows.length){
+    const {error}=await cloudClient.from("daily_records").upsert(rows,{onConflict:"user_id,record_date"});
+    if(error) throw error;
+  }
+  await upsertTimerCloud();
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`تم رفع ${rows.length} يومًا بنجاح · ${cloudLastSync}`,"ok");
+}
+function cloudRowToLocal(row){
+  return {
+    sessions:Array.isArray(row.sessions)?row.sessions:[],
+    workSeconds:Number(row.work_seconds)||0,
+    hours:Math.floor((Number(row.work_seconds)||0)/WORK_SECONDS),
+    prepState:row.prep_state||{},
+    updatedAt:row.updated_at||new Date().toISOString()
+  };
+}
+async function downloadAllCloud(force=false){
+  if(!cloudReady()) return;
+  setCloudStatus("جارٍ تنزيل بيانات السحابة...");
+  const {data:rows,error}=await cloudClient.from("daily_records")
+    .select("record_date,work_seconds,sessions,prep_state,updated_at")
+    .order("record_date",{ascending:true});
+  if(error) throw error;
+
+  cloudApplying=true;
+  try{
+    for(const row of rows||[]){
+      const k=row.record_date;
+      const local=data[k];
+      const localTime=local?.updatedAt?Date.parse(local.updatedAt):0;
+      const cloudTime=row.updated_at?Date.parse(row.updated_at):0;
+      if(force || !local || cloudTime>=localTime){
+        data[k]=cloudRowToLocal(row);
+      }
+    }
+
+    const {data:pRow}=await cloudClient.from("profiles")
+      .select("display_name,updated_at").eq("user_id",cloudUser.id).maybeSingle();
+    if(pRow?.display_name) profile={...profile,name:pRow.display_name};
+
+    const {data:tRow}=await cloudClient.from("timer_state")
+      .select("*").eq("user_id",cloudUser.id).maybeSingle();
+    if(tRow && tRow.record_date===todayKey()){
+      session={
+        date:tRow.record_date,
+        mode:tRow.mode||"work",
+        taskMode:tRow.task_mode||"base",
+        activeIndex:Number.isInteger(tRow.active_index)?tRow.active_index:tRow.active_index,
+        redoQueue:Array.isArray(tRow.redo_queue)?tRow.redo_queue:[],
+        remaining:Number(tRow.remaining_seconds)||0,
+        workRemaining:Number(tRow.work_remaining_seconds)||0,
+        running:!!tRow.running,
+        lastTick:tRow.running&&tRow.started_at?Date.parse(tRow.started_at):null
+      };
+      cloudTimerUpdatedAt=tRow.updated_at?Date.parse(tRow.updated_at):Date.now();
+      cloudStateSig=sessionCloudSignature();
+    }
+
+    const todayCloud=(rows||[]).find(r=>r.record_date===todayKey());
+    if(todayCloud?.prep_state && Object.keys(todayCloud.prep_state).length){
+      prepState=todayCloud.prep_state;
+    }
+
+    localStorage.setItem(DATA_KEY,JSON.stringify(data));
+    localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));
+    localStorage.setItem(PREP_KEY,JSON.stringify(prepState));
+    if(session)localStorage.setItem(TIMER_KEY,JSON.stringify(session));
+    normalizeData();initSession();normalizePrepState();renderAll();
+  }finally{
+    cloudApplying=false;
+  }
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`تم تنزيل ${rows?.length||0} يومًا · ${cloudLastSync}`,"ok");
+}
+
+async function fetchTodayCloudRecordExact(){
+  const {data:row,error}=await cloudClient.from("daily_records")
+    .select("record_date,work_seconds,sessions,prep_state,updated_at")
+    .eq("user_id",cloudUser.id).eq("record_date",todayKey()).maybeSingle();
+  if(error) throw error;
+  return row;
+}
+function timerRowToLocal(tRow){
+  return {
+    date:tRow.record_date,
+    mode:tRow.mode||"work",
+    taskMode:tRow.task_mode||"base",
+    activeIndex:Number.isInteger(tRow.active_index)?tRow.active_index:tRow.active_index,
+    redoQueue:Array.isArray(tRow.redo_queue)?tRow.redo_queue:[],
+    remaining:Number(tRow.remaining_seconds)||0,
+    workRemaining:Number(tRow.work_remaining_seconds)||0,
+    running:!!tRow.running,
+    lastTick:tRow.running&&tRow.started_at?Date.parse(tRow.started_at):null
+  };
+}
+async function pullLiveCloudState(){
+  if(!cloudReady()||cloudApplying||cloudPollBusy) return;
+  cloudPollBusy=true;
+  try{
+    const {data:tRow,error}=await cloudClient.from("timer_state")
+      .select("*").eq("user_id",cloudUser.id).maybeSingle();
+    if(error) throw error;
+    if(!tRow || tRow.record_date!==todayKey()) return;
+
+    const remoteTs=tRow.updated_at?Date.parse(tRow.updated_at):0;
+    if(!remoteTs || remoteTs<=cloudTimerUpdatedAt) return;
+
+    /* جهاز آخر نفّذ بدء/إيقاف/Break/انتقال/اكتمال.
+       نأخذ daily_record ثم timer_state كحالة واحدة. */
+    const dayRow=await fetchTodayCloudRecordExact();
+
+    cloudApplying=true;
+    try{
+      if(dayRow){
+        data[todayKey()]=cloudRowToLocal(dayRow);
+      }
+      session=timerRowToLocal(tRow);
+
+      if(dayRow?.prep_state && Object.keys(dayRow.prep_state).length){
+        prepState=dayRow.prep_state;
+      }
+
+      localStorage.setItem(DATA_KEY,JSON.stringify(data));
+      localStorage.setItem(TIMER_KEY,JSON.stringify(session));
+      localStorage.setItem(PREP_KEY,JSON.stringify(prepState));
+
+      cloudTimerUpdatedAt=remoteTs;
+      cloudStateSig=sessionCloudSignature();
+
+      normalizeData();
+      initSession();
+      normalizePrepState();
+      renderAll();
+
+      cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+      setCloudStatus(`تحديث حي من جهاز آخر · ${cloudLastSync}`,"ok");
+    }finally{
+      cloudApplying=false;
+    }
+  }catch(e){
+    setCloudStatus(`تعذر التحديث الحي: ${e.message||e}`,"warn");
+  }finally{
+    cloudPollBusy=false;
+  }
+}
+function startLiveCloudPolling(){
+  if(window.__achievementLivePoll) return;
+  window.__achievementLivePoll=setInterval(()=>pullLiveCloudState(),2000);
+}
+
+async function handleCloudLogin(){
+  if(!cloudReady()) return;
+  startLiveCloudPolling();
+  try{
+    const {count,error}=await cloudClient.from("daily_records")
+      .select("id",{count:"exact",head:true});
+    if(error) throw error;
+
+    if((count||0)===0 && allRecordKeys().length>0){
+      setCloudStatus(`الحساب السحابي فارغ، وعلى هذا الجهاز ${allRecordKeys().length} يومًا محفوظًا.`,"warn");
+      if(confirm(`وجدت ${allRecordKeys().length} يومًا محفوظًا على هذا الجهاز، والحساب السحابي فارغ. هل تريد رفع بياناتك الحالية إلى Supabase الآن؟`)){
+        await uploadAllLocalToCloudDirect();
+      }
+    }else if((count||0)>0){
+      await downloadAllCloud(false);
+    }else{
+      await syncCurrentToCloud();
+    }
+  }catch(e){
+    setCloudStatus(`تعذر بدء المزامنة: ${e.message||e}`,"warn");
+  }
+}
+async function uploadAllLocalToCloudDirect(){
+  if(!cloudReady()) return;
+  setCloudStatus("جارٍ نقل بياناتك القديمة إلى Supabase...");
+  await upsertProfileCloud();
+  const rows=allRecordKeys().map(localRecordToCloud);
+  if(rows.length){
+    const {error}=await cloudClient.from("daily_records").upsert(rows,{onConflict:"user_id,record_date"});
+    if(error) throw error;
+  }
+  await upsertTimerCloud();
+  cloudLastSync=new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  setCloudStatus(`تم نقل ${rows.length} يومًا إلى السحابة بنجاح · ${cloudLastSync}`,"ok");
+}
+function soundEnabled(){return localStorage.getItem(SOUND_KEY)!=="off"}
+function ensureAudio(){
+  if(!audioCtx){
+    const C=window.AudioContext||window.webkitAudioContext;
+    if(C) audioCtx=new C();
+  }
+  if(audioCtx?.state==="suspended") audioCtx.resume();
+}
+function tone(freq,start,dur,volume=.18,type="square"){
+  if(!audioCtx||!soundEnabled()) return;
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type=type;osc.frequency.value=freq;
+  gain.gain.setValueAtTime(.001,audioCtx.currentTime+start);
+  gain.gain.linearRampToValueAtTime(volume,audioCtx.currentTime+start+.015);
+  gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+start+dur);
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime+start);osc.stop(audioCtx.currentTime+start+dur+.03);
+}
+function playBell(kind){
+  if(!soundEnabled()) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  if(kind==="workStart"){
+    tone(880,0,.16,.15);tone(1175,.18,.24,.15);
+  }else if(kind==="workEnd"){
+    tone(988,0,.20,.20);
+    tone(1319,.22,.20,.20);
+    tone(1568,.44,.20,.21);
+    tone(1976,.68,.42,.22);
+  }else if(kind==="breakStart"){
+    tone(659,0,.18,.16);tone(523,.21,.30,.16);
+  }else if(kind==="breakEnd"){
+    tone(523,0,.16,.17);tone(659,.18,.16,.17);tone(880,.36,.36,.19);
+  }else if(kind==="prepTransition"){
+    tone(784,0,.16,.17);tone(1047,.18,.18,.18);
+  }else if(kind==="prepDone"){
+    tone(784,0,.18,.20);tone(1047,.20,.18,.20);tone(1319,.40,.18,.21);tone(1568,.62,.45,.22);
+  }else{
+    tone(880,0,.18,.15);
+  }
+}
+function updateSoundButton(){
+  const b=document.getElementById("soundBtn"),on=soundEnabled();
+  b.textContent=on?"🔔":"🔕";
+  b.classList.toggle("sound-off",!on);
+}
+
+
+
+function requestNotificationPermission(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission==="default"){
+    try{ Notification.requestPermission(); }catch(e){}
+  }
+}
+
+function notifyHourFinished(hourNumber){
+  const next=hourNumber<MAX?hourNumber+1:null;
+  if("Notification" in window && Notification.permission==="granted"){
+    try{
+      new Notification(
+        `اكتملت الساعة ${hourNumber}`,
+        {
+          body: next?`بدأت الساعة ${next} تلقائيًا.`:"اكتمل هدف اليوم: 12 ساعة.",
+          tag:"achievement-hour-finished",
+          renotify:true,
+          silent:false
+        }
+      );
+    }catch(e){}
+  }
+}
+
+function miniStyles(){
+  return `
+    :root{color-scheme:dark}
+    *{box-sizing:border-box}
+    body{
+      margin:0;background:#0b1017;color:#f8fafc;
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:12px;text-align:center;
+    }
+    .mini-card{
+      width:100%;border:1px solid #2a3544;border-radius:18px;
+      background:#111923;padding:16px;
+    }
+    .mini-title{font-size:12px;color:#a6b0bf;margin-bottom:5px}
+    .mini-time{font-size:42px;font-weight:850;letter-spacing:2px;font-variant-numeric:tabular-nums;color:#60a5fa}
+    .mini-time.break{color:#fbbf24}
+    .mini-hour{font-size:14px;font-weight:750;margin-top:3px}
+    .mini-progress{height:7px;background:#202b39;border-radius:99px;overflow:hidden;margin:12px 0}
+    .mini-progress>div{height:100%;background:#60a5fa}
+    .mini-status{font-size:11px;color:#a6b0bf}
+    .mini-actions{display:flex;gap:6px;justify-content:center;margin-top:10px}
+    button{
+      border:1px solid #344255;background:#182230;color:#fff;
+      border-radius:9px;padding:7px 10px;font:inherit;cursor:pointer
+    }
+  `;
+}
+
+function buildMiniDocument(win){
+  const doc=win.document;
+  doc.open();
+  doc.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>Achievement Timer</title><style>${miniStyles()}</style></head>
+  <body>
+    <div class="mini-card">
+      <div class="mini-title" id="miniTitle">Achievement Tracker</div>
+      <div class="mini-time" id="miniTime">60:00</div>
+      <div class="mini-hour" id="miniHour">الساعة 1 من 12</div>
+      <div class="mini-progress"><div id="miniProgress" style="width:0%"></div></div>
+      <div class="mini-status" id="miniStatus">جاهز</div>
+      <div class="mini-actions">
+        <button id="miniPause">إيقاف</button>
+        <button id="miniResume">استئناف</button>
+        <button id="miniBreak">Break</button>
+      </div>
+    </div>
+  </body></html>`);
+  doc.close();
+
+  doc.getElementById("miniPause").onclick=()=>pauseTimer();
+  doc.getElementById("miniResume").onclick=()=>startOrResume();
+  doc.getElementById("miniBreak").onclick=()=>startBreak();
+
+  win.addEventListener("pagehide",()=>{
+    if(miniTimerWindow===win){
+      miniTimerWindow=null;
+      miniTimerMode="none";
+      updateMiniButton();
+    }
+  });
+
+  updateMiniWindow();
+}
+
+function updateMiniButton(){
+  const b=document.getElementById("miniBtn");
+  if(!b) return;
+  b.textContent=miniTimerWindow && !miniTimerWindow.closed?"إغلاق المصغرة":"نافذة مصغرة";
+}
+
+async function toggleMiniWindow(){
+  requestNotificationPermission();
+
+  if(miniTimerWindow && !miniTimerWindow.closed){
+    try{miniTimerWindow.close();}catch(e){}
+    miniTimerWindow=null;
+    miniTimerMode="none";
+    updateMiniButton();
+    return;
+  }
+
+  /* الخيار الأفضل في Chrome/Edge: Document Picture-in-Picture،
+     وهي نافذة صغيرة تبقى فوق النوافذ الأخرى. */
+  if("documentPictureInPicture" in window){
+    try{
+      miniTimerWindow=await window.documentPictureInPicture.requestWindow({width:310,height:230});
+      miniTimerMode="pip";
+      buildMiniDocument(miniTimerWindow);
+      updateMiniButton();
+      return;
+    }catch(e){}
+  }
+
+  /* بديل للمتصفحات التي لا تدعم Document PiP.
+     نافذة مستقلة صغيرة، لكن المتصفح/النظام هو من يقرر هل تبقى فوق باقي النوافذ. */
+  try{
+    miniTimerWindow=window.open("","achievementMiniTimer","popup=yes,width=330,height=260,resizable=yes");
+    if(miniTimerWindow){
+      miniTimerMode="popup";
+      buildMiniDocument(miniTimerWindow);
+    }
+  }catch(e){}
+
+  updateMiniButton();
+}
+
+function updateMiniWindow(){
+  if(!miniTimerWindow || miniTimerWindow.closed) return;
+  try{
+    const doc=miniTimerWindow.document,timeEl=doc.getElementById("miniTime");
+    if(!timeEl) return;
+    initSession();
+    const isBreak=session.mode==="break",rem=previewRemaining();
+    const idx=session.activeIndex;
+    const total=isBreak?BREAK_SECONDS:WORK_SECONDS;
+    const progress=Math.max(0,Math.min(100,(total-rem)/total*100));
+
+    timeEl.textContent=mmss(rem);
+    timeEl.className="mini-time"+(isBreak?" break":"");
+    doc.getElementById("miniHour").textContent=isBreak?"Break — 10 دقائق":(idx>=0?`الجلسة ${idx+1} من 12${session.taskMode==="redo"?" · إعادة":""}`:"لا توجد جلسة نشطة");
+    doc.getElementById("miniProgress").style.width=progress+"%";
+    doc.getElementById("miniStatus").textContent=session.running?"● المؤقت يعمل":"● المؤقت متوقف";
+  }catch(e){}
+}
+
+function freshPrepState(){
+  return {
+    date:todayKey(),
+    counts:{focus:0,easy:0},
+    active:null
+  };
+}
+function normalizePrepState(){
+  if(!prepState || prepState.date!==todayKey()){
+    prepState=freshPrepState();
+    savePrepState();
+  }
+  if(!prepState.counts) prepState.counts={focus:0,easy:0};
+  if(typeof prepState.counts.focus!=="number") prepState.counts.focus=0;
+  if(typeof prepState.counts.easy!=="number") prepState.counts.easy=0;
+}
+function savePrepState(){localStorage.setItem(PREP_KEY,JSON.stringify(prepState));queueCloudSync()}
+function prepElapsed(){
+  const a=prepState?.active;
+  if(!a?.running || !a.lastTick) return 0;
+  return Math.max(0,Math.floor((Date.now()-a.lastTick)/1000));
+}
+function prepRemainingPreview(){
+  normalizePrepState();
+  const a=prepState.active;
+  if(!a) return PREP_TYPES.focus.work;
+  if(!a.running) return a.remaining;
+  return Math.max(0,a.remaining-prepElapsed());
+}
+function prepPhaseTotal(a=prepState?.active){
+  if(!a) return PREP_TYPES.focus.work;
+  return a.phase==="work"?PREP_TYPES[a.type].work:PREP_TYPES[a.type].break;
+}
+function pauseMainForPrep(){
+  if(session?.running){
+    consumeElapsed();
+    session.running=false;
+    session.lastTick=null;
+    persistSession();
+    document.getElementById("timerStatus").textContent="تم إيقاف جلسة الساعة مؤقتًا لأن تهيئة البداية تعمل الآن.";
+  }
+}
+function pausePrepForMain(){
+  normalizePrepState();
+  if(prepState.active?.running){
+    syncPrepElapsed();
+    prepState.active.running=false;
+    prepState.active.lastTick=null;
+    savePrepState();
+  }
+}
+function startPrep(type){
+  normalizePrepState();
+  ensureAudio();
+
+  if(!PREP_TYPES[type]) return;
+  if(prepState.counts[type]>=PREP_LIMIT){
+    document.getElementById("prepStatus").textContent="وصلت إلى الحد اليومي لهذا النوع: 3 مرات.";
+    return;
+  }
+
+  pauseMainForPrep();
+
+  prepState.active={
+    type,
+    phase:"work",
+    remaining:PREP_TYPES[type].work,
+    running:true,
+    lastTick:Date.now()
+  };
+  savePrepState();
+  playBell("workStart");
+  document.getElementById("prepStatus").textContent=`بدأت ${PREP_TYPES[type].label}.`;
+  renderPrep();
+}
+function resumePrep(){
+  normalizePrepState();
+  const a=prepState.active;
+  if(!a || a.running) return;
+
+  pauseMainForPrep();
+  ensureAudio();
+  a.running=true;
+  a.lastTick=Date.now();
+  savePrepState();
+  playBell(a.phase==="work"?"workStart":"breakStart");
+  renderPrep();
+}
+function pausePrep(){
+  normalizePrepState();
+  const a=prepState.active;
+  if(!a?.running) return;
+  syncPrepElapsed();
+  a.running=false;
+  a.lastTick=null;
+  savePrepState();
+  document.getElementById("prepStatus").textContent="تم إيقاف التهيئة مؤقتًا. يمكنك استئنافها من نفس النقطة.";
+  renderPrep();
+}
+function cancelPrep(){
+  normalizePrepState();
+  if(!prepState.active) return;
+  if(prepState.active.running) syncPrepElapsed();
+  prepState.active=null;
+  savePrepState();
+  document.getElementById("prepStatus").textContent="تم إلغاء التهيئة الحالية. لم تُحتسب ضمن مرات اليوم.";
+  renderPrep();
+}
+function syncPrepElapsed(){
+  normalizePrepState();
+  const a=prepState.active;
+  if(!a?.running || !a.lastTick) return;
+
+  const elapsed=prepElapsed();
+  if(elapsed<=0) return;
+
+  a.remaining=Math.max(0,a.remaining-elapsed);
+  a.lastTick=Date.now();
+
+  if(a.remaining<=0){
+    if(a.phase==="work"){
+      a.phase="break";
+      a.remaining=PREP_TYPES[a.type].break;
+      a.running=true;
+      a.lastTick=Date.now();
+      savePrepState();
+      playBell("prepTransition");
+      document.getElementById("prepStatus").textContent="انتهى وقت العمل. بدأ البريك تلقائيًا.";
+    }else{
+      const type=a.type;
+      prepState.counts[type]=Math.min(PREP_LIMIT,(prepState.counts[type]||0)+1);
+      prepState.active=null;
+      savePrepState();
+      playBell("prepDone");
+      document.getElementById("prepStatus").textContent=`اكتملت التهيئة. استخدمت هذا النوع ${prepState.counts[type]} من ${PREP_LIMIT} مرات اليوم.`;
+    }
+  }else{
+    savePrepState();
+  }
+}
+function renderPrep(){
+  normalizePrepState();
+  const a=prepState.active;
+  const fc=prepState.counts.focus||0,ec=prepState.counts.easy||0;
+
+  document.getElementById("prepCountFocus").textContent=`${fc} / ${PREP_LIMIT}`;
+  document.getElementById("prepCountEasy").textContent=`${ec} / ${PREP_LIMIT}`;
+  document.getElementById("prepFocusDone").textContent=fc;
+  document.getElementById("prepEasyDone").textContent=ec;
+  document.getElementById("prepTotalDone").textContent=fc+ec;
+
+  const fbtn=document.getElementById("startPrepFocus");
+  const ebtn=document.getElementById("startPrepEasy");
+  fbtn.disabled=fc>=PREP_LIMIT || !!a;
+  ebtn.disabled=ec>=PREP_LIMIT || !!a;
+  document.getElementById("prepOptionFocus").classList.toggle("exhausted",fc>=PREP_LIMIT);
+  document.getElementById("prepOptionEasy").classList.toggle("exhausted",ec>=PREP_LIMIT);
+
+  const resume=document.getElementById("prepResumeBtn");
+  const pause=document.getElementById("prepPauseBtn");
+  const cancel=document.getElementById("prepCancelBtn");
+  const timer=document.getElementById("prepTimer");
+  const phase=document.getElementById("prepPhase");
+
+  if(!a){
+    document.getElementById("prepModeLabel").textContent="اختر نوع التهيئة للبدء";
+    timer.textContent="--:--";
+    timer.className="timer work-mode";
+    phase.textContent="جاهز";
+    phase.className="prep-phase";
+    resume.disabled=true;pause.disabled=true;cancel.disabled=true;
+    document.getElementById("prepProgress").style.width="0%";
+    return;
+  }
+
+  const rem=prepRemainingPreview();
+  const total=prepPhaseTotal(a);
+  const progress=Math.max(0,Math.min(100,(total-rem)/total*100));
+
+  document.getElementById("prepModeLabel").textContent=PREP_TYPES[a.type].label;
+  timer.textContent=mmss(rem);
+  timer.className="timer "+(a.phase==="break"?"break-mode":"work-mode");
+  phase.textContent=a.phase==="work"?"وقت العمل":"وقت البريك";
+  phase.className="prep-phase "+(a.phase==="break"?"break":"");
+  resume.disabled=a.running;
+  resume.textContent=a.running?"يعمل الآن":"استئناف";
+  pause.disabled=!a.running;
+  cancel.disabled=false;
+  document.getElementById("prepProgress").style.width=progress+"%";
+}
+function prepTick(){
+  normalizePrepState();
+  if(prepState.active?.running) syncPrepElapsed();
+  renderPrep();
+}
+
+function freshSession(){
+  const idx=firstOpenSession(todayKey(),0);
+  const item=idx>=0?getSessionItem(idx):null;
+  return {
+    date:todayKey(),
+    mode:"work",
+    taskMode:"base",
+    activeIndex:idx,
+    redoQueue:[],
+    running:false,
+    remaining:item?Math.max(0,WORK_SECONDS-item.seconds):0,
+    workRemaining:item?Math.max(0,WORK_SECONDS-item.seconds):0,
+    lastTick:null
+  };
+}
+function persistSession(){
+  localStorage.setItem(TIMER_KEY,JSON.stringify(session));
+  const sig=sessionCloudSignature();
+  if(cloudStateSig===null){
+    cloudStateSig=sig;
+  }else if(sig!==cloudStateSig){
+    cloudStateSig=sig;
+    queueSignificantCloudState();
+  }
+}
+function migrateOldTimerPartial(){
+  /* بيانات v10 محفوظة أصلًا في workSeconds. هنا نحافظ عليها ونضيف فقط بنية الجلسات. */
+  normalizeData();
+  localStorage.setItem(TIMER_MIGRATION_KEY,"yes");
+}
+function normalizeTimerShape(){
+  if(!session || typeof session!=="object" || session.date!==todayKey()){
+    session=freshSession();
+    persistSession();
+    return;
+  }
+  if(!["work","break"].includes(session.mode)) session.mode="work";
+  if(!["base","redo"].includes(session.taskMode)) session.taskMode="base";
+  if(!Array.isArray(session.redoQueue)) session.redoQueue=[];
+  if(!Number.isInteger(session.activeIndex)) session.activeIndex=firstOpenSession();
+  if(session.activeIndex>=MAX || session.activeIndex<0){
+    session.activeIndex=firstOpenSession();
+  }
+  if(!Number.isFinite(session.remaining)){
+    if(session.taskMode==="redo") session.remaining=WORK_SECONDS;
+    else if(session.activeIndex>=0) session.remaining=Math.max(0,WORK_SECONDS-getSessionItem(session.activeIndex).seconds);
+    else session.remaining=0;
+  }
+  if(!Number.isFinite(session.workRemaining)) session.workRemaining=session.remaining;
+  if(session.running && (!Number.isFinite(session.lastTick) || session.lastTick<=0)){
+    session.running=false;session.lastTick=null;
+  }
+  if(session.running && session.lastTick>Date.now()+5000){
+    session.running=false;session.lastTick=null;
+  }
+  persistSession();
+}
+function initSession(){normalizeTimerShape()}
+function pendingElapsed(){
+  if(!session?.running || !Number.isFinite(session.lastTick)) return 0;
+  const diff=Date.now()-session.lastTick;
+  if(!Number.isFinite(diff)||diff<=0) return 0;
+  return Math.floor(diff/1000);
+}
+function previewWorkSeconds(){
+  const stored=getWorkSeconds();
+  if(!session?.running || session.mode!=="work" || session.date!==todayKey()) return stored;
+  return stored+Math.min(pendingElapsed(),Math.max(0,session.remaining));
+}
+function previewRemaining(){
+  if(!session?.running) return Math.max(0,session.remaining||0);
+  return Math.max(0,(session.remaining||0)-pendingElapsed());
+}
+function prepareBaseSession(index,run=false){
+  if(index<0 || index>=MAX) return false;
+  const item=getSessionItem(index);
+  if(item.closed) return false;
+  session.taskMode="base";
+  session.activeIndex=index;
+  session.redoQueue=[];
+  session.remaining=Math.max(0,WORK_SECONDS-item.seconds);
+  session.workRemaining=session.remaining;
+  session.mode="work";
+  session.running=run;
+  session.lastTick=run?Date.now():null;
+  persistSession();
+  return true;
+}
+function prepareRedoQueue(indices,run=false){
+  indices=[...new Set(indices)].filter(i=>i>=0&&i<MAX);
+  if(!indices.length) return false;
+  session.taskMode="redo";
+  session.activeIndex=indices[0];
+  session.redoQueue=indices.slice(1);
+  session.mode="work";
+  session.remaining=WORK_SECONDS;
+  session.workRemaining=WORK_SECONDS;
+  session.running=run;
+  session.lastTick=run?Date.now():null;
+  persistSession();
+  return true;
+}
+function advanceAfterBase(autoRun){
+  const next=firstOpenSession(todayKey(),session.activeIndex+1);
+  if(next<0){
+    session.activeIndex=-1;session.remaining=0;session.workRemaining=0;
+    session.running=false;session.lastTick=null;
+    persistSession();
+    return false;
+  }
+  prepareBaseSession(next,autoRun);
+  return true;
+}
+function advanceRedo(autoRun){
+  if(session.redoQueue?.length){
+    const next=session.redoQueue.shift();
+    session.activeIndex=next;
+    session.remaining=WORK_SECONDS;
+    session.workRemaining=WORK_SECONDS;
+    session.running=autoRun;
+    session.lastTick=autoRun?Date.now():null;
+    persistSession();
+    return true;
+  }
+  session.running=false;session.lastTick=null;
+  session.remaining=0;session.workRemaining=0;
+  persistSession();
+  return false;
+}
+function applyWorkDelta(seconds,k=todayKey(),ring=true){
+  let left=Math.max(0,Math.floor(seconds));
+  let completed=[];
+
+  while(left>0 && session.mode==="work"){
+    if(session.taskMode==="redo"){
+      if(session.activeIndex<0) break;
+      const take=Math.min(left,Math.max(0,session.remaining));
+      getSessionItem(session.activeIndex,k).bonusSeconds+=take;
+      session.remaining-=take;session.workRemaining=session.remaining;
+      left-=take;syncDayRecord(k,false);
+
+      if(session.remaining<=0){
+        completed.push(session.activeIndex);
+        if(ring){playBell("workEnd");notifyHourFinished(session.activeIndex+1)}
+        if(!advanceRedo(true)) break;
+      }
+    }else{
+      if(session.activeIndex<0){
+        const idx=firstOpenSession(k);
+        if(idx<0) break;
+        prepareBaseSession(idx,true);
+      }
+      const item=getSessionItem(session.activeIndex,k);
+      if(item.closed){
+        if(!advanceAfterBase(true)) break;
+        continue;
+      }
+
+      const need=Math.max(0,WORK_SECONDS-item.seconds);
+      const take=Math.min(left,need);
+      item.seconds+=take;
+      session.remaining=Math.max(0,WORK_SECONDS-item.seconds);
+      session.workRemaining=session.remaining;
+      left-=take;syncDayRecord(k,false);
+
+      if(item.seconds>=WORK_SECONDS){
+        item.seconds=WORK_SECONDS;item.closed=true;syncDayRecord(k,false);
+        const doneIndex=session.activeIndex;
+        completed.push(doneIndex);
+        if(ring){playBell("workEnd");notifyHourFinished(doneIndex+1)}
+        if(!advanceAfterBase(true)) break;
+      }
+    }
+  }
+
+  syncDayRecord(k,true);
+  return completed;
+}
+function consumeElapsed(){
+  if(!session?.running || !Number.isFinite(session.lastTick)) return {elapsed:0,completed:[]};
+  const elapsed=pendingElapsed();
+  if(elapsed<=0) return {elapsed:0,completed:[]};
+
+  if(session.mode==="break"){
+    const take=Math.min(elapsed,Math.max(0,session.remaining));
+    session.remaining=Math.max(0,session.remaining-take);
+    session.lastTick=Date.now();
+    if(session.remaining<=0){
+      session.mode="work";
+      session.remaining=session.workRemaining??0;
+      session.running=false;session.lastTick=null;
+      persistSession();playBell("breakEnd");
+      document.getElementById("timerStatus").textContent="انتهى البريك. جلسة العمل جاهزة للاستئناف.";
+    }else persistSession();
+    return {elapsed:take,completed:[]};
+  }
+
+  const completed=applyWorkDelta(elapsed,session.date,true);
+  if(session.running) session.lastTick=Date.now();
+  persistSession();
+
+  if(completed.length){
+    const last=completed[completed.length-1]+1;
+    if(session.taskMode==="redo" && !session.running){
+      document.getElementById("timerStatus").textContent=`اكتملت إعادة الجلسة ${last}.`;
+    }else if(session.activeIndex>=0){
+      document.getElementById("timerStatus").textContent=`اكتملت الجلسة ${last}. بدأت الجلسة ${session.activeIndex+1} تلقائيًا.`;
+    }else{
+      document.getElementById("timerStatus").textContent="اكتملت جميع جلسات اليوم.";
+    }
+  }
+  return {elapsed,completed};
+}
+function startOrResume(){
+  initSession();pausePrepForMain();ensureAudio();requestNotificationPermission();
+  if(session.running) return;
+
+  if(session.mode==="break"){
+    session.running=true;session.lastTick=Date.now();persistSession();playBell("breakStart");renderAll();return;
+  }
+
+  if(session.taskMode==="base"){
+    if(session.activeIndex<0 || getSessionItem(session.activeIndex).closed){
+      const idx=firstOpenSession();
+      if(idx<0){document.getElementById("timerStatus").textContent="لا توجد جلسات أساسية مفتوحة. استخدم إدارة الجلسات إذا أردت إعادة جلسة.";return}
+      prepareBaseSession(idx,false);
+    }else{
+      session.remaining=Math.max(0,WORK_SECONDS-getSessionItem(session.activeIndex).seconds);
+      session.workRemaining=session.remaining;
+    }
+  }else if(session.remaining<=0){
+    if(!session.redoQueue?.length){document.getElementById("timerStatus").textContent="لا توجد جلسة إعادة جاهزة.";return}
+    session.activeIndex=session.redoQueue.shift();session.remaining=WORK_SECONDS;session.workRemaining=WORK_SECONDS;
+  }
+
+  session.running=true;session.lastTick=Date.now();persistSession();playBell("workStart");
+  document.getElementById("timerStatus").textContent=`بدأت الجلسة ${session.activeIndex+1}.`;
+  renderAll();
+}
+function pauseTimer(){
+  initSession();
+  if(!session.running) return;
+  consumeElapsed();
+  session.running=false;session.lastTick=null;persistSession();
+  document.getElementById("timerStatus").textContent=session.mode==="break"?"تم إيقاف البريك مؤقتًا.":"تم إيقاف الجلسة مؤقتًا وتم حفظ الوقت.";
+  renderAll();
+}
+function startBreak(){
+  initSession();ensureAudio();
+  if(session.mode==="break") return;
+  if(session.running) consumeElapsed();
+  session.workRemaining=session.remaining;
+  session.mode="break";session.remaining=BREAK_SECONDS;session.running=true;session.lastTick=Date.now();
+  persistSession();playBell("breakStart");
+  document.getElementById("timerStatus").textContent="بدأ Break لمدة 10 دقائق. يمكنك إيقافه أو العودة للجلسة.";
+  renderAll();
+}
+function returnToWork(auto=false){
+  initSession();ensureAudio();
+  if(session.mode!=="break") return;
+  if(session.running) consumeElapsed();
+  session.mode="work";session.remaining=session.workRemaining??0;session.running=false;session.lastTick=null;
+  persistSession();playBell("breakEnd");
+  document.getElementById("timerStatus").textContent=auto?"انتهى البريك.":"تم إنهاء البريك. الجلسة جاهزة للاستئناف.";
+  renderAll();
+}
+function completePhase(){renderAll()}
+function tick(){
+  initSession();
+
+  if(session.date && session.date!==todayKey()){
+    if(session.running && Number.isFinite(session.lastTick)){
+      const oldDate=dateFromKey(session.date);
+      const midnight=new Date(oldDate.getFullYear(),oldDate.getMonth(),oldDate.getDate()+1).getTime();
+      const elapsed=Math.max(0,Math.floor((Math.min(Date.now(),midnight)-session.lastTick)/1000));
+      if(elapsed>0 && session.mode==="work") applyWorkDelta(elapsed,session.date,false);
+    }
+    session=freshSession();session.running=false;session.lastTick=null;persistSession();
+    document.getElementById("timerStatus").textContent="بدأ يوم جديد. تم حفظ يوم أمس، ومؤقت اليوم الجديد جاهز.";
+    renderAll();return;
+  }
+
+  if(session.running) consumeElapsed();
+  renderTimer();renderHours();renderAchievementDashboard();
+}
+function mmss(s){
+  s=Math.max(0,Math.floor(s));
+  return `${pad(Math.floor(s/60))}:${pad(s%60)}`;
+}
+function renderTimer(){
+  initSession();
+  const rem=previewRemaining(),isBreak=session.mode==="break";
+  const timerEl=document.getElementById("timer");
+  timerEl.textContent=mmss(rem);
+  timerEl.className="timer "+(isBreak?"break-mode":"work-mode");
+
+  let label;
+  if(isBreak) label="Break — 10 دقائق";
+  else if(session.activeIndex>=0) label=`الجلسة ${session.activeIndex+1} من 12${session.taskMode==="redo"?" · إعادة":""}`;
+  else label="لا توجد جلسة نشطة";
+  document.getElementById("timerLabel").textContent=label;
+
+  const start=document.getElementById("startBtn"),pause=document.getElementById("pauseBtn");
+  const br=document.getElementById("breakBtn"),ret=document.getElementById("returnBtn");
+  const finish=document.getElementById("finishSessionBtn");
+
+  start.textContent=session.running?"يعمل الآن":(isBreak?"استئناف البريك":rem<WORK_SECONDS?"استئناف":"ابدأ");
+  start.disabled=session.running || (!isBreak && session.activeIndex<0);
+  pause.disabled=!session.running;
+  br.classList.toggle("hidden",isBreak);
+  ret.classList.toggle("hidden",!isBreak);
+  finish.disabled=isBreak || session.activeIndex<0;
+
+  const heartbeat=document.getElementById("timerHeartbeat");
+  if(heartbeat){
+    heartbeat.textContent=session.running?"● المؤقت يعمل":"● المؤقت متوقف";
+    heartbeat.className="timer-heartbeat "+(session.running?"running":"paused");
+  }
+  updateMiniWindow();
+}
+function renderHours(){
+  initSession();
+  const items=getDaySessions(),wrap=document.getElementById("hours");
+  wrap.innerHTML="";
+
+  items.forEach((item,idx)=>{
+    const box=document.createElement("div");
+    const active=idx===session.activeIndex && session.mode==="work";
+    const full=item.seconds>=WORK_SECONDS;
+    const partialClosed=item.closed && item.seconds<WORK_SECONDS;
+    box.className="hour "+(full?"done":partialClosed?"finished-partial":active?"active":"manual-ready");
+
+    let fill=item.seconds/WORK_SECONDS*100;
+    if(active && session.running && session.taskMode==="base"){
+      fill=Math.min(100,(item.seconds+Math.min(pendingElapsed(),session.remaining))/WORK_SECONDS*100);
+    }
+
+    let state;
+    if(full) state=item.bonusSeconds>0?`مكتملة + ${formatDuration(item.bonusSeconds,true)}`:"مكتملة";
+    else if(partialClosed) state=`منتهية · ${formatDuration(item.seconds,true)}`;
+    else if(active && session.taskMode==="redo") state=`إعادة · ${formatDuration(item.bonusSeconds,true)}`;
+    else if(active) state=session.running?"قيد الإنجاز":"الجلسة الحالية";
+    else if(item.seconds>0) state=`جزئية · ${formatDuration(item.seconds,true)}`;
+    else state="جاهزة";
+
+    box.innerHTML=`<div class="fill" style="width:${Math.max(0,Math.min(100,fill))}%"></div><span class="num">${idx+1}</span><span class="state">${state}</span>`;
+    wrap.appendChild(box);
+  });
+
+  const sec=previewWorkSeconds();
+  document.getElementById("todayHours").textContent=formatDuration(sec,true);
+  document.getElementById("todayPercent").textContent=Math.min(100,Math.round(sec/DAY_SECONDS*100))+"%";
+  document.getElementById("todayProgress").style.width=Math.min(100,sec/DAY_SECONDS*100)+"%";
+}
+function renderToday(){
+  const d=now();
+  document.getElementById("todayTitle").textContent=fmtDate(d);
+  document.getElementById("monthTotalTop").textContent=formatDuration(monthSeconds(d),true);
+  renderAchievementDashboard();
+  renderTimer();
+  renderHours();
+  renderHonorMini();
+}
+function renderWeek(){
+  const d=now(),dates=weekDates(d),secs=dates.map(x=>getWorkSeconds(keyFromDate(x))),vals=secs.map(s=>s/WORK_SECONDS),totalSec=secs.reduce((a,b)=>a+b,0);
+  document.getElementById("weekTitle").textContent=`${fmtShort(dates[0])} — ${fmtShort(dates[6])}`;
+  document.getElementById("weekTotal").textContent=formatDuration(totalSec,true);
+  document.getElementById("weekAverage").textContent=formatDuration(Math.round(totalSec/7),true);
+  document.getElementById("weekBest").textContent=formatDuration(Math.max(0,...secs),true);
+
+  const g=document.getElementById("weekGrid");g.innerHTML="";
+  dates.forEach((x,i)=>{
+    const v=vals[i],s=secs[i];
+    g.innerHTML+=`<div class="day ${keyFromDate(x)===todayKey()?"today":""}">
+      <div class="name">${DAYS[x.getDay()]}</div><div class="num">${x.getDate()}</div>
+      <div class="hoursnum">${formatDuration(s,true)}</div>
+      <div class="bar"><div style="width:${Math.min(100,v/MAX*100)}%"></div></div>
+      ${rankChip(v,12,"daily")}
+    </div>`;
+  });
+}
+function renderMonth(){
+  const d=now(),y=d.getFullYear(),m=d.getMonth(),days=monthDays(y,m),secs=[],vals=[];
+  for(let day=1;day<=days;day++){
+    const s=getWorkSeconds(keyFromDate(new Date(y,m,day)));secs.push(s);vals.push(s/WORK_SECONDS);
+  }
+  const totalSec=secs.reduce((a,b)=>a+b,0),total=totalSec/WORK_SECONDS;
+  const elapsed=Math.min(d.getDate(),days);
+  const elapsedSec=secs.slice(0,elapsed).reduce((a,b)=>a+b,0);
+
+  document.getElementById("monthTitle").textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById("monthTotal").textContent=formatDuration(totalSec,true);
+  document.getElementById("monthAverage").textContent=formatDuration(elapsed?Math.round(elapsedSec/elapsed):0,true);
+  document.getElementById("monthBest").textContent=formatDuration(Math.max(0,...secs),true);
+
+  const max=days*12,r=rankInfo(total,max,"monthly");
+  document.getElementById("monthRankDetail").innerHTML=`الرتبة الحالية: <strong>${r.name}</strong> · المستوى المتوقع حسب متوسط الأيام المنقضية: <strong>${currentMonthForecast()}</strong> · الهدف الكامل: ${max} ساعة.`;
+
+  const grid=document.getElementById("monthGrid");grid.innerHTML="";
+  const offset=new Date(y,m,1).getDay(),weeks=Math.ceil((offset+days)/7);
+  for(let w=0;w<weeks;w++){
+    let wtSec=0,from=null,to=null;
+    for(let i=0;i<7;i++){
+      const day=w*7+i-offset+1;
+      if(day>=1&&day<=days){
+        const x=new Date(y,m,day);
+        wtSec+=getWorkSeconds(keyFromDate(x));
+        if(!from)from=x;to=x;
+      }
+    }
+    grid.innerHTML+=`<div class="month-week"><strong>الأسبوع ${w+1}</strong><div class="small">${fmtShort(from)} — ${fmtShort(to)}</div><div class="total">${formatDuration(wtSec,true)}</div></div>`;
+  }
+}
+function renderHistory(){
+  const list=document.getElementById("historyList");list.innerHTML="";
+  const d=now();
+  for(let i=0;i<30;i++){
+    const x=new Date(d);x.setDate(d.getDate()-i);
+    const s=getWorkSeconds(keyFromDate(x)),v=s/WORK_SECONDS;
+    list.innerHTML+=`<div class="history-row">
+      <div><strong>${DAYS[x.getDay()]}</strong><div class="small">${fmtDate(x)}</div>${rankChip(v,12,"daily")}</div>
+      <div class="history-mid"><strong>${formatDuration(s,true)}</strong></div>
+      <div class="history-bar"><div style="width:${Math.min(100,v/MAX*100)}%"></div></div>
+    </div>`;
+  }
+}
+function aggregateWeeks(){
+  const map={};
+  allRecordKeys().forEach(k=>{
+    const d=dateFromKey(k),wk=keyFromDate(startOfWeek(d));
+    if(!map[wk]) map[wk]=0;
+    map[wk]+=getWorkSeconds(k);
+  });
+  return map;
+}
+function aggregateMonths(){
+  const map={};
+  allRecordKeys().forEach(k=>{
+    const ym=k.slice(0,7);
+    if(!map[ym]) map[ym]=0;
+    map[ym]+=getWorkSeconds(k);
+  });
+  return map;
+}
+function bestDay(){
+  let best={seconds:0,key:null};
+  allRecordKeys().forEach(k=>{const s=getWorkSeconds(k);if(s>best.seconds)best={seconds:s,key:k}});
+  return best;
+}
+function bestWeek(){
+  const m=aggregateWeeks();let best={seconds:0,key:null};
+  Object.entries(m).forEach(([k,s])=>{if(s>best.seconds)best={seconds:s,key:k}});
+  return best;
+}
+function bestMonth(){
+  const m=aggregateMonths();let best={seconds:0,key:null};
+  Object.entries(m).forEach(([k,s])=>{if(s>best.seconds)best={seconds:s,key:k}});
+  return best;
+}
+function honorHTML(label,best,type){
+  if(!best.key) return `<div class="label">${label}</div><div class="big">—</div><div class="meta">لا توجد بيانات بعد</div>`;
+  const value=best.seconds/WORK_SECONDS;
+  if(type==="day"){
+    const d=dateFromKey(best.key),r=rankInfo(value,12,"daily");
+    return `<div class="label">${label}</div><div class="big">${formatDuration(best.seconds,true)}</div><div class="meta">${r.icon} ${r.name} · ${fmtDate(d)}</div>`;
+  }
+  if(type==="week"){
+    const s=dateFromKey(best.key),e=new Date(s);e.setDate(e.getDate()+6),r=rankInfo(value,84,"weekly");
+    return `<div class="label">${label}</div><div class="big">${formatDuration(best.seconds,true)}</div><div class="meta">${r.icon} ${r.name} · ${fmtShort(s)} — ${fmtShort(e)}</div>`;
+  }
+  const [y,m]=best.key.split("-").map(Number),days=monthDays(y,m-1),r=rankInfo(value,days*12,"monthly");
+  return `<div class="label">${label}</div><div class="big">${formatDuration(best.seconds,true)}</div><div class="meta">${r.icon} ${r.name} · ${MONTHS[m-1]} ${y}</div>`;
+}
+function renderHonorMini(){
+  document.getElementById("bestDayCard").innerHTML=honorHTML("أفضل يوم",bestDay(),"day");
+  document.getElementById("bestWeekCard").innerHTML=honorHTML("أفضل أسبوع",bestWeek(),"week");
+  document.getElementById("bestMonthCard").innerHTML=honorHTML("أفضل شهر",bestMonth(),"month");
+}
+function bestGoodStreak(){
+  const keys=allRecordKeys();
+  if(!keys.length) return 0;
+  const set=new Set(keys.filter(k=>getWorkSeconds(k)>=6*WORK_SECONDS));
+  let best=0,current=0,d=dateFromKey(keys[0]),end=dateFromKey(keys[keys.length-1]);
+  while(d<=end){
+    if(set.has(keyFromDate(d))){current++;best=Math.max(best,current)} else current=0;
+    d.setDate(d.getDate()+1);
+  }
+  return best;
+}
+function rankCounts(){
+  const counts={day:{good:0,pro:0,legend:0},week:{good:0,pro:0,legend:0},month:{good:0,pro:0,legend:0}};
+  const tk=todayKey();
+  allRecordKeys().forEach(k=>{
+    if(k>=tk) return;
+    const r=rankInfo(getHoursValue(k),12,"daily").key;
+    if(counts.day[r]!=null) counts.day[r]++;
+  });
+
+  const thisWeek=keyFromDate(startOfWeek(now()));
+  Object.entries(aggregateWeeks()).forEach(([k,s])=>{
+    if(k>=thisWeek) return;
+    const r=rankInfo(s/WORK_SECONDS,84,"weekly").key;
+    if(counts.week[r]!=null) counts.week[r]++;
+  });
+
+  const thisMonth=todayKey().slice(0,7);
+  Object.entries(aggregateMonths()).forEach(([k,s])=>{
+    if(k>=thisMonth) return;
+    const [y,m]=k.split("-").map(Number),max=monthDays(y,m-1)*12;
+    const r=rankInfo(s/WORK_SECONDS,max,"monthly").key;
+    if(counts.month[r]!=null) counts.month[r]++;
+  });
+  return counts;
+}
+function countsHTML(c){
+  return `<div class="count-line"><span style="color:var(--legend)">أسطوري</span><strong>${c.legend}</strong></div>
+          <div class="count-line"><span style="color:var(--pro)">محترف</span><strong>${c.pro}</strong></div>
+          <div class="count-line"><span style="color:var(--good)">إنجاز جيد</span><strong>${c.good}</strong></div>`;
+}
+function renderYear(){
+  const keys=allRecordKeys(),allSec=keys.reduce((a,k)=>a+getWorkSeconds(k),0),counts=rankCounts();
+  const bd=bestDay(),bw=bestWeek(),bm=bestMonth();
+
+  document.getElementById("allHours").textContent=formatDuration(allSec,true);
+  document.getElementById("bestStreak").textContent=bestGoodStreak();
+  document.getElementById("legendDays").textContent=counts.day.legend;
+  document.getElementById("legendWeeks").textContent=counts.week.legend;
+  document.getElementById("yearBestDay").innerHTML=honorHTML("أفضل يوم",bd,"day");
+  document.getElementById("yearBestWeek").innerHTML=honorHTML("أفضل أسبوع",bw,"week");
+  document.getElementById("yearBestMonth").innerHTML=honorHTML("أفضل شهر",bm,"month");
+  document.getElementById("dayRankCounts").innerHTML=countsHTML(counts.day);
+  document.getElementById("weekRankCounts").innerHTML=countsHTML(counts.week);
+  document.getElementById("monthRankCounts").innerHTML=countsHTML(counts.month);
+
+  const list=document.getElementById("yearList");list.innerHTML="";
+  const n=now();
+  for(let i=11;i>=0;i--){
+    const d=new Date(n.getFullYear(),n.getMonth()-i,1);
+    const sec=monthSeconds(d),value=sec/WORK_SECONDS,max=monthDays(d.getFullYear(),d.getMonth())*12;
+    list.innerHTML+=`<div class="history-row">
+      <div><strong>${MONTHS[d.getMonth()]} ${d.getFullYear()}</strong><div>${rankChip(value,max,"monthly")}</div></div>
+      <div class="history-mid"><strong>${formatDuration(sec,true)}</strong></div>
+      <div class="history-bar"><div style="width:${Math.min(100,value/max*100)}%"></div></div>
+    </div>`;
+  }
+}
+function applyTheme(){
+  const dark=localStorage.getItem(THEME_KEY)==="dark";
+  document.body.classList.toggle("dark",dark);
+  document.getElementById("themeBtn").textContent=dark?"☀":"☾";
+}
+function renderAll(){
+  applyTheme();
+  renderPersonalGreeting();
+  updateSoundButton();
+  renderPrep();
+  renderToday();
+  renderWeek();
+  renderMonth();
+  renderHistory();
+  renderYear();
+}
+
+
+
+function openManageSessions(){
+  if(session?.running) pauseTimer();
+  renderManageSessions();
+  const m=document.getElementById("manageSessionsModal");
+  m.classList.remove("hidden");m.setAttribute("aria-hidden","false");
+}
+function closeManageSessions(){
+  const m=document.getElementById("manageSessionsModal");
+  m.classList.add("hidden");m.setAttribute("aria-hidden","true");
+}
+function selectedManageIndices(){
+  return [...document.querySelectorAll('#manageSessionsGrid input[type="checkbox"]:checked')].map(x=>Number(x.value));
+}
+function renderManageSessions(){
+  const items=getDaySessions(),g=document.getElementById("manageSessionsGrid");
+  g.innerHTML="";
+  items.forEach((s,i)=>{
+    const full=s.seconds>=WORK_SECONDS;
+    const state=full?"مكتملة":s.closed?`منتهية جزئيًا`:s.seconds>0?"جزئية":"غير منجزة";
+    const bonus=s.bonusSeconds>0?` + إعادة ${formatDuration(s.bonusSeconds,true)}`:"";
+    const label=document.createElement("label");
+    label.className="manage-session "+(i===session.activeIndex?"active-session ":"")+(s.closed&&s.seconds<WORK_SECONDS?"finished-partial":"");
+    label.innerHTML=`<input type="checkbox" value="${i}"><div><div class="ms-num">الجلسة ${i+1}</div><div class="ms-state">${state}</div><div class="ms-time">${formatDuration(s.seconds,true)}${bonus}</div></div>`;
+    const cb=label.querySelector("input");
+    cb.onchange=()=>label.classList.toggle("selected",cb.checked);
+    g.appendChild(label);
+  });
+}
+function requireSelection(){
+  const sel=selectedManageIndices();
+  if(!sel.length){alert("حدد جلسة واحدة على الأقل أولًا.");return null}
+  return sel;
+}
+function jumpToSelectedSession(){
+  const sel=requireSelection();if(!sel)return;
+  if(sel.length!==1){alert("للانتقال اختر جلسة واحدة فقط.");return}
+  const i=sel[0],item=getSessionItem(i);
+  if(item.closed){
+    alert("هذه الجلسة منتهية. استخدم «إعادة دون حذف الإنجاز السابق» أو «إعادة من الصفر» بدل الانتقال.");
+    return;
+  }
+  if(!confirm(`سيتم جعل الجلسة ${i+1} هي الجلسة الحالية. لن يتم تغيير إنجاز بقية الجلسات. هل تريد المتابعة؟`)) return;
+  prepareBaseSession(i,false);
+  closeManageSessions();renderAll();
+  document.getElementById("timerStatus").textContent=`تم الانتقال إلى الجلسة ${i+1}.`;
+}
+function markSelectedComplete(){
+  const sel=requireSelection();if(!sel)return;
+  const add=sel.reduce((sum,i)=>sum+Math.max(0,WORK_SECONDS-getSessionItem(i).seconds),0);
+  if(!confirm(`سيتم تسجيل ${sel.length} جلسة كمكتملة، وإضافة ${formatDuration(add,true)} إلى وقت اليوم عند الحاجة. هل تريد المتابعة؟`)) return;
+  sel.forEach(i=>completeSessionRecord(i));
+  if(sel.includes(session.activeIndex) && session.taskMode==="base"){
+    const next=firstOpenSession(todayKey(),session.activeIndex+1);
+    if(next>=0) prepareBaseSession(next,false); else {session.activeIndex=-1;session.remaining=0;session.running=false;persistSession()}
+  }
+  renderManageSessions();renderAll();
+}
+function redoSelectedFromScratch(){
+  const sel=requireSelection();if(!sel)return;
+  const removed=sel.reduce((sum,i)=>sum+getSessionItem(i).seconds+getSessionItem(i).bonusSeconds,0);
+  if(!confirm(`سيتم حذف ${formatDuration(removed,true)} من الوقت المسجل في الجلسات المحددة وإعادتها إلى 00 دقيقة. لا يمكن التراجع. هل تريد المتابعة؟`)) return;
+  sel.forEach(i=>resetSessionRecord(i));
+  prepareBaseSession(sel[0],false);
+  renderManageSessions();renderAll();
+  document.getElementById("timerStatus").textContent=`تمت إعادة ${sel.length} جلسة من الصفر.`;
+}
+function redoSelectedKeepPrevious(){
+  const sel=requireSelection();if(!sel)return;
+  if(!confirm(`ستبدأ إعادة ${sel.length} جلسة دون حذف إنجازها السابق. أي وقت جديد سيضاف إلى إجمالي اليوم. هل تريد المتابعة؟`)) return;
+  prepareRedoQueue(sel,false);
+  closeManageSessions();renderAll();
+  document.getElementById("timerStatus").textContent=`إعادة الجلسة ${sel[0]+1} جاهزة. اضغط ابدأ.`;
+}
+function openFinishSession(){
+  initSession();
+  if(session.mode==="break" || session.activeIndex<0) return;
+  if(session.running) pauseTimer();
+  const idx=session.activeIndex;
+  const item=getSessionItem(idx);
+  const actual=session.taskMode==="redo"?(WORK_SECONDS-session.remaining):item.seconds;
+  document.getElementById("finishSessionText").textContent=`الجلسة ${idx+1}: الوقت المنجز في هذه المحاولة ${formatDuration(actual,true)}.`;
+  const m=document.getElementById("finishSessionModal");
+  m.classList.remove("hidden");m.setAttribute("aria-hidden","false");
+}
+function closeFinishSession(){
+  const m=document.getElementById("finishSessionModal");
+  m.classList.add("hidden");m.setAttribute("aria-hidden","true");
+}
+function finishAtActual(){
+  const idx=session.activeIndex;
+  if(idx<0)return;
+  if(session.taskMode==="redo"){
+    /* وقت الإعادة المنجز أضيف بالفعل؛ ننهي هذه الإعادة كما هي. */
+    if(!advanceRedo(false)){session.taskMode="base";const next=firstOpenSession();if(next>=0)prepareBaseSession(next,false)}
+  }else{
+    closeSessionAtActual(idx);
+    advanceAfterBase(false);
+  }
+  closeFinishSession();renderAll();
+  document.getElementById("timerStatus").textContent=`تم إنهاء الجلسة ${idx+1} وحفظ الوقت الفعلي فقط.`;
+}
+function finishAsFull(){
+  const idx=session.activeIndex;
+  if(idx<0)return;
+  if(session.taskMode==="redo"){
+    const add=Math.max(0,session.remaining);
+    getSessionItem(idx).bonusSeconds+=add;syncDayRecord(todayKey(),true);
+    if(!advanceRedo(false)){session.taskMode="base";const next=firstOpenSession();if(next>=0)prepareBaseSession(next,false)}
+  }else{
+    completeSessionRecord(idx);
+    advanceAfterBase(false);
+  }
+  playBell("workEnd");notifyHourFinished(idx+1);
+  closeFinishSession();renderAll();
+  document.getElementById("timerStatus").textContent=`تم اعتبار الجلسة ${idx+1} مكتملة 60 دقيقة.`;
+}
+function openResetModal(){
+  const modal=document.getElementById("resetModal");
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden","false");
+}
+function closeResetModal(){
+  const modal=document.getElementById("resetModal");
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden","true");
+}
+function resetCurrentDay(){
+  if(session?.running) consumeElapsed();
+  cloudForceOverwriteDates.add(todayKey());
+  delete data[todayKey()];
+  ensureDayRecord(todayKey());saveData();
+  session=freshSession();session.running=false;session.lastTick=null;persistSession();
+  closeResetModal();
+  document.getElementById("timerStatus").textContent="تمت إعادة جلسات اليوم الحالي. الجلسة الأولى جاهزة عند 60:00.";
+  renderAll();
+}
+
+document.getElementById("startPrepFocus").onclick=()=>startPrep("focus");
+document.getElementById("startPrepEasy").onclick=()=>startPrep("easy");
+document.getElementById("prepResumeBtn").onclick=resumePrep;
+document.getElementById("prepPauseBtn").onclick=pausePrep;
+document.getElementById("prepCancelBtn").onclick=cancelPrep;
+
+document.getElementById("cloudBtn").onclick=openCloud;
+document.getElementById("closeCloudBtn").onclick=closeCloud;
+document.getElementById("signInBtn").onclick=signInCloud;
+document.getElementById("signUpBtn").onclick=signUpCloud;
+document.getElementById("signOutBtn").onclick=signOutCloud;
+document.getElementById("syncNowBtn").onclick=()=>syncCurrentToCloud().catch(e=>setCloudStatus(`فشل: ${e.message||e}`,"warn"));
+document.getElementById("uploadLocalBtn").onclick=()=>uploadAllLocalToCloud().catch(e=>setCloudStatus(`فشل الرفع: ${e.message||e}`,"warn"));
+document.getElementById("downloadCloudBtn").onclick=async()=>{
+  if(confirm("سيتم تنزيل أحدث بيانات السحابة. السجلات الأحدث في السحابة ستُطبق على هذا الجهاز. هل تريد المتابعة؟")){
+    try{await downloadAllCloud(true)}catch(e){setCloudStatus(`فشل التنزيل: ${e.message||e}`,"warn")}
+  }
+};
+document.getElementById("cloudModal").addEventListener("click",e=>{if(e.target.id==="cloudModal")closeCloud()});
+
+document.getElementById("settingsBtn").onclick=openSettings;
+document.getElementById("closeSettingsBtn").onclick=closeSettings;
+document.getElementById("saveProfileBtn").onclick=saveProfileFromSettings;
+document.getElementById("exportBackupBtn").onclick=exportBackup;
+document.getElementById("importBackupBtn").onclick=()=>document.getElementById("backupFileInput").click();
+document.getElementById("backupFileInput").addEventListener("change",e=>importBackupFile(e.target.files?.[0]));
+document.getElementById("settingsModal").addEventListener("click",e=>{if(e.target.id==="settingsModal")closeSettings()});
+
+document.getElementById("manageSessionsBtn").onclick=openManageSessions;
+document.getElementById("closeManageBtn").onclick=closeManageSessions;
+document.getElementById("jumpSessionBtn").onclick=jumpToSelectedSession;
+document.getElementById("markCompleteBtn").onclick=markSelectedComplete;
+document.getElementById("redoKeepBtn").onclick=redoSelectedKeepPrevious;
+document.getElementById("redoResetBtn").onclick=redoSelectedFromScratch;
+document.getElementById("finishSessionBtn").onclick=openFinishSession;
+document.getElementById("finishActualBtn").onclick=finishAtActual;
+document.getElementById("finishFullBtn").onclick=finishAsFull;
+document.getElementById("cancelFinishBtn").onclick=closeFinishSession;
+document.getElementById("manageSessionsModal").addEventListener("click",e=>{if(e.target.id==="manageSessionsModal")closeManageSessions()});
+document.getElementById("finishSessionModal").addEventListener("click",e=>{if(e.target.id==="finishSessionModal")closeFinishSession()});
+
+document.getElementById("startBtn").onclick=startOrResume;
+document.getElementById("pauseBtn").onclick=pauseTimer;
+document.getElementById("breakBtn").onclick=startBreak;
+document.getElementById("returnBtn").onclick=()=>returnToWork(false);
+
+document.getElementById("resetTodayBtn").onclick=openResetModal;
+document.getElementById("cancelResetBtn").onclick=closeResetModal;
+document.getElementById("confirmResetBtn").onclick=resetCurrentDay;
+document.getElementById("resetModal").addEventListener("click",e=>{
+  if(e.target.id==="resetModal") closeResetModal();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){closeResetModal();closeManageSessions();closeFinishSession();closeSettings();closeCloud();}
+});
+
+document.getElementById("miniBtn").onclick=toggleMiniWindow;
+
+document.getElementById("soundBtn").onclick=()=>{
+  const on=soundEnabled();
+  localStorage.setItem(SOUND_KEY,on?"off":"on");
+  if(!on){ensureAudio();playBell("generic")}
+  updateSoundButton();
+};
+document.getElementById("themeBtn").onclick=()=>{
+  localStorage.setItem(THEME_KEY,localStorage.getItem(THEME_KEY)==="dark"?"light":"dark");
+  applyTheme();
+};
+document.getElementById("todayBtn").onclick=()=>document.querySelector('[data-tab="today"]').click();
+function refreshTab(tabName){
+  if(tabName==="prep") renderPrep();
+  else if(tabName==="today") renderToday();
+  else if(tabName==="week") renderWeek();
+  else if(tabName==="month") renderMonth();
+  else if(tabName==="history") renderHistory();
+  else if(tabName==="year") renderYear();
+}
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.remove("hidden");
+
+    /* مهم: نحسب بيانات التبويب من السجل مباشرة عند فتحه،
+       بدل الاعتماد على القيم التي كانت موجودة عند تحميل الصفحة. */
+    refreshTab(btn.dataset.tab);
+  };
+});
+
+
+/* تحديث بصري متعدد المسارات لـ Chrome وFirefox.
+   الحساب من Date.now، وليس من عدد نبضات setInterval. */
+let lastUiSecond=-1;
+
+function paintRunningTimers(){
+  const currentSecond=Math.floor(Date.now()/1000);
+  if(currentSecond===lastUiSecond) return;
+  lastUiSecond=currentSecond;
+
+  if(session?.running){
+    renderTimer();
+    renderHours();
+    renderAchievementDashboard();
+  }
+  if(prepState?.active?.running){
+    renderPrep();
+  }
+  updateMiniWindow();
+}
+
+function liveUiLoop(){
+  paintRunningTimers();
+  requestAnimationFrame(liveUiLoop);
+}
+
+function chromeFallbackLoop(){
+  paintRunningTimers();
+  setTimeout(chromeFallbackLoop,250);
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    initSession();
+    tick();
+    prepTick();
+    renderAll();
+    lastUiSecond=-1;
+    paintRunningTimers();
+  }
+});
+
+window.addEventListener("focus",()=>{
+  initSession();
+  tick();
+  renderAll();
+  lastUiSecond=-1;
+  paintRunningTimers();
+});
+
+/* إذا أُغلقت الصفحة أو انتقلت للخلف، نوقف الجلسة ونحفظ الوقت المنجز بدل احتساب وقت الإغلاق. */
+function safelyPauseOnExit(){
+  if(session?.running){
+    if(cloudReady()){
+      /* في وضع Live Multi-Device لا نوقف المؤقت عند إغلاق الجهاز.
+         timer_state السحابي يظل هو الساعة المشتركة ويمكن لجهاز آخر إكمالها. */
+      localStorage.setItem(TIMER_KEY,JSON.stringify(session));
+    }else{
+      consumeElapsed();
+      session.running=false;
+      session.lastTick=null;
+      persistSession();
+    }
+  }
+  normalizePrepState();
+  if(prepState.active?.running){
+    syncPrepElapsed();
+    if(prepState.active){
+      prepState.active.running=false;
+      prepState.active.lastTick=null;
+      savePrepState();
+    }
+  }
+}
+window.addEventListener("pagehide",safelyPauseOnExit);
+window.addEventListener("beforeunload",safelyPauseOnExit);
+
+normalizeData();
+if(!profile||typeof profile!=="object")profile={name:"عبدالله"};
+saveProfile();
+ensureDayRecord(todayKey());
+saveData();
+migrateOldTimerPartial();
+initSession();
+normalizePrepState();
+renderAll();
+initSupabase();
+setInterval(tick,1000);
+setInterval(prepTick,1000);
+
+/* تحديث الإحصاءات المجمعة دوريًا حتى لو بقي التطبيق مفتوحًا لساعات أو أيام. */
+setInterval(()=>{
+  const active=document.querySelector(".tab.active")?.dataset.tab;
+  if(active && ["week","month","history","year"].includes(active)) refreshTab(active);
+},5000);
+
+requestAnimationFrame(liveUiLoop);
+chromeFallbackLoop();
+</script>
+
+</body>
+</html>
